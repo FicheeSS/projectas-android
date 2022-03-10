@@ -44,16 +44,14 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   /// Returns the unformated json, throws [FormatException] in case of error
   Future<String> getJsonFromRest(String table) async {
     //ENTER CRED HERE LIKE username:password
-    var cred = "";
-    if(cred.isEmpty){
-      throw const FormatException("Credential not submitted");
-    }
+    /*
     var bytes = utf8.encode(cred);
     cred = base64.encode(bytes);
+     */
     var url = Uri.parse(
-        "https://webdev.iut-orsay.fr/~tbocque/RestExample/rest.php?table=$table");
+        "https://projets.iut-orsay.fr/prj-as-2022/Examples/rest.php?table=$table");
     final response = await http.get(url, headers: {
-      'Authorization' : 'basic $cred',
+      //'Authorization' : 'basic $cred',
       'Accept': 'application/json',
     });
     if (kDebugMode) {
