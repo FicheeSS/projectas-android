@@ -38,7 +38,34 @@ class MyStatefulWidget extends StatefulWidget {
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _StatefulWidgetShowData extends State<MyStatefulWidget>{
+
+  late Container _currentContain ;
+  @override
+  Widget build(BuildContext context) {
+    List<Widget> children;
+    children = const <Widget>[
+      SizedBox(
+        width: 60,
+        height: 60,
+        child: CircularProgressIndicator(),
+      ),
+      Padding(
+        padding: EdgeInsets.only(top: 16),
+        child: Text('Awaiting result...',
+            style: const TextStyle(fontSize: 15)),
+      )
+    ];
+    _currentContain =Container(
+        child : Center(
+      child: Column(
+     mainAxisAlignment: MainAxisAlignment.center,
+     children: children,
+      )
+    )
+    );
+    return _currentContain;
+  }
   ///Gets the [table] in Json from the rest api
   ///
   /// Returns the unformated json, throws [FormatException] in case of error
@@ -67,14 +94,11 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     return response.body;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return DefaultTextStyle(
-      style: Theme.of(context).textTheme.headline2!,
-      textAlign: TextAlign.center,
-      child: FutureBuilder<String>(
-        future: getJsonFromRest(
-            "voiture"), // a previously-obtained Future<String> or null
+  void createFrameFromJson(Future<String> json) {
+    _currentContain =  Container(
+      child :
+     FutureBuilder<String>(
+        future: json, // a previously-obtained Future<String> or null
         builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
           List<Widget> children;
           if (snapshot.hasData) {
@@ -87,7 +111,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               Padding(
                 padding: const EdgeInsets.only(top: 16),
                 child: Text('${snapshot.data}',
-                style: const TextStyle(fontSize: 15)),
+                    style: const TextStyle(fontSize: 15)),
               )
             ];
           } else if (snapshot.hasError) {
@@ -123,8 +147,31 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               children: children,
             ),
           );
-        },
-      ),
+        }
+    )
     );
+  }
+
+}
+
+class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+  _StatefulWidgetShowData dataShower = _StatefulWidgetShowData();
+  @override
+  Widget build(BuildContext context) {
+    dataShower.build(context);
+     return DefaultTextStyle(
+      style: Theme.of(context).textTheme.headline2!,
+      textAlign: TextAlign.center,
+        child: Column(
+          children : [
+            dataShower._currentContain,
+            ElevatedButton(onPressed: ()=> {
+              dataShower.createFrameFromJson(dataShower.getJsonFromRest("voiture"))
+            },
+            child: const Text("data"),),
+          ]
+        )
+     )
+     ;
   }
 }
