@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:testiut/Views/ShowView.dart';
+import 'package:testiut/Views/WaitingView.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,160 +16,82 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: 'Welcome to Flutter',
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Welcome to Flutter'),
-        ),
-        body: const Center(
-          child: MyStatefulWidget(),
-        ),
-      ),
+      home: Scaffold(body: MyStatefulWidget()),
     );
   }
+}
+
+//List of the state of the main Window
+enum currentState {
+  none,
+  loading,
+  loaded,
 }
 
 class MyStatefulWidget extends StatefulWidget {
   const MyStatefulWidget({Key? key}) : super(key: key);
+
   @override
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
 }
 
-class _StatefulWidgetShowData extends State<MyStatefulWidget>{
-
-  late Container _currentContain ;
-  @override
-  Widget build(BuildContext context) {
-    List<Widget> children;
-    children = const <Widget>[
-      SizedBox(
-        width: 60,
-        height: 60,
-        child: CircularProgressIndicator(),
-      ),
-      Padding(
-        padding: EdgeInsets.only(top: 16),
-        child: Text('Awaiting result...',
-            style: const TextStyle(fontSize: 15)),
-      )
-    ];
-    _currentContain =Container(
-        child : Center(
-      child: Column(
-     mainAxisAlignment: MainAxisAlignment.center,
-     children: children,
-      )
-    )
-    );
-    return _currentContain;
-  }
-  ///Gets the [table] in Json from the rest api
-  ///
-  /// Returns the unformated json, throws [FormatException] in case of error
-  Future<String> getJsonFromRest(String table) async {
-    //ENTER CRED HERE LIKE username:password
-    /*
-    var bytes = utf8.encode(cred);
-    cred = base64.encode(bytes);
-     */
-    var url = Uri.parse(
-        "https://projets.iut-orsay.fr/prj-as-2022/Examples/rest.php?table=$table");
-    final response = await http.get(url, headers: {
-      //'Authorization' : 'basic $cred',
-      'Accept': 'application/json',
-    });
-    if (kDebugMode) {
-      print(response.body);
-    }
-    if (response.statusCode != 200) {
-      //The resquest was not succesfull
-      if (kDebugMode) {
-        print("bruh moment");
-      }
-      throw const FormatException("Error");
-    }
-    return response.body;
-  }
-
-  void createFrameFromJson(Future<String> json) {
-    _currentContain =  Container(
-      child :
-     FutureBuilder<String>(
-        future: json, // a previously-obtained Future<String> or null
-        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-          List<Widget> children;
-          if (snapshot.hasData) {
-            children = <Widget>[
-              const Icon(
-                Icons.check_circle_outline,
-                color: Colors.green,
-                size: 60,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Text('${snapshot.data}',
-                    style: const TextStyle(fontSize: 15)),
-              )
-            ];
-          } else if (snapshot.hasError) {
-            children = <Widget>[
-              const Icon(
-                Icons.error_outline,
-                color: Colors.red,
-                size: 60,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Text('Error: ${snapshot.error}',
-                    style: const TextStyle(fontSize: 15)),
-              )
-            ];
-          } else {
-            children = const <Widget>[
-              SizedBox(
-                width: 60,
-                height: 60,
-                child: CircularProgressIndicator(),
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 16),
-                child: Text('Awaiting result...',
-                    style: const TextStyle(fontSize: 15)),
-              )
-            ];
-          }
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: children,
-            ),
-          );
-        }
-    )
-    );
-  }
-
-}
-
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-  _StatefulWidgetShowData dataShower = _StatefulWidgetShowData();
+  currentState _cs = currentState.none;
+
+  //Main callback to change the displayed view
+  callback(currentState cs) {
+    setState(() {
+      _cs = cs;
+    });
+  }
+
+//Select the correct view for the job from [_cs]
+  Widget showCorrectWidget() {
+    switch (_cs) {
+      case currentState.none:
+        return WaitingView(
+          callbackFunction: callback,
+        );
+        break;
+      case currentState.loading:
+        return ShowView(
+          table: "voiture",
+          callbackFunction: callback,
+        );
+        break;
+      case currentState.loaded:
+        return WaitingView(
+          callbackFunction: callback,
+        );
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    dataShower.build(context);
-     return DefaultTextStyle(
-      style: Theme.of(context).textTheme.headline2!,
-      textAlign: TextAlign.center,
-        child: Column(
-          children : [
-            dataShower._currentContain,
-            ElevatedButton(onPressed: ()=> {
-              dataShower.createFrameFromJson(dataShower.getJsonFromRest("voiture"))
-            },
-            child: const Text("data"),),
-          ]
-        )
-     )
-     ;
+    return Center(
+      child: Column(
+        children: [
+          showCorrectWidget(),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            ElevatedButton(
+              onPressed: () => {
+                setState(() {
+                  _cs = currentState.loading;
+                })
+              },
+              child: const Text("Load From Rest"),
+            ),
+            ElevatedButton(
+                onPressed: () => setState(() {
+                      _cs = currentState.loaded;
+                    }),
+                child: Text("Reset")),
+          ])
+        ],
+      ),
+    );
   }
 }
