@@ -7,7 +7,13 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+<<<<<<< Updated upstream
 import 'package:http/http.dart' as http;
+=======
+import 'package:testiut/Views/MapView.dart';
+import 'package:testiut/Views/ShowView.dart';
+import 'package:testiut/Views/WaitingView.dart';
+>>>>>>> Stashed changes
 
 void main() {
   runApp(const MyApp());
@@ -32,6 +38,17 @@ class MyApp extends StatelessWidget {
   }
 }
 
+<<<<<<< Updated upstream
+=======
+//List of the state of the main Window
+enum currentState {
+  none,
+  loading,
+  loaded,
+  showMap,
+}
+
+>>>>>>> Stashed changes
 class MyStatefulWidget extends StatefulWidget {
   const MyStatefulWidget({Key? key}) : super(key: key);
   @override
@@ -54,6 +71,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       //'Authorization' : 'basic $cred',
       'Accept': 'application/json',
     });
+<<<<<<< Updated upstream
     if (kDebugMode) {
       print(response.body);
     }
@@ -63,6 +81,32 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         print("bruh moment");
       }
       throw const FormatException("Error");
+=======
+  }
+
+//Select the correct view for the job from [_cs]
+  Widget showCorrectWidget() {
+    switch (_cs) {
+      case currentState.none:
+        return WaitingView(
+          callbackFunction: callback,
+        );
+        break;
+      case currentState.loading:
+        return ShowView(
+          table: "voiture",
+          callbackFunction: callback,
+        );
+        break;
+      case currentState.loaded:
+        return WaitingView(
+          callbackFunction: callback,
+        );
+        break;
+      case currentState.showMap:
+        return MapView();
+        break;
+>>>>>>> Stashed changes
     }
     return response.body;
   }
@@ -122,8 +166,23 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: children,
             ),
+<<<<<<< Updated upstream
           );
         },
+=======
+            ElevatedButton(
+                onPressed: () => setState(() {
+                      _cs = currentState.loaded;
+                    }),
+                child: Text("Reset")),
+            ElevatedButton(
+                onPressed: () => setState(() {
+                  _cs = currentState.showMap;
+                }),
+                child: Text("show map")),
+          ])
+        ],
+>>>>>>> Stashed changes
       ),
     );
   }
