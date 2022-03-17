@@ -7,13 +7,10 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-<<<<<<< Updated upstream
 import 'package:http/http.dart' as http;
-=======
 import 'package:testiut/Views/MapView.dart';
 import 'package:testiut/Views/ShowView.dart';
 import 'package:testiut/Views/WaitingView.dart';
->>>>>>> Stashed changes
 
 void main() {
   runApp(const MyApp());
@@ -38,8 +35,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-<<<<<<< Updated upstream
-=======
+
 //List of the state of the main Window
 enum currentState {
   none,
@@ -48,7 +44,6 @@ enum currentState {
   showMap,
 }
 
->>>>>>> Stashed changes
 class MyStatefulWidget extends StatefulWidget {
   const MyStatefulWidget({Key? key}) : super(key: key);
   @override
@@ -56,32 +51,13 @@ class MyStatefulWidget extends StatefulWidget {
 }
 
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-  ///Gets the [table] in Json from the rest api
-  ///
-  /// Returns the unformated json, throws [FormatException] in case of error
-  Future<String> getJsonFromRest(String table) async {
-    //ENTER CRED HERE LIKE username:password
-    /*
-    var bytes = utf8.encode(cred);
-    cred = base64.encode(bytes);
-     */
-    var url = Uri.parse(
-        "https://projets.iut-orsay.fr/prj-as-2022/Examples/rest.php?table=$table");
-    final response = await http.get(url, headers: {
-      //'Authorization' : 'basic $cred',
-      'Accept': 'application/json',
+  currentState _cs = currentState.none;
+
+
+  callback(currentState cs) {
+    setState(() {
+      _cs = cs;
     });
-<<<<<<< Updated upstream
-    if (kDebugMode) {
-      print(response.body);
-    }
-    if (response.statusCode != 200) {
-      //The resquest was not succesfull
-      if (kDebugMode) {
-        print("bruh moment");
-      }
-      throw const FormatException("Error");
-=======
   }
 
 //Select the correct view for the job from [_cs]
@@ -106,84 +82,41 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       case currentState.showMap:
         return MapView();
         break;
->>>>>>> Stashed changes
     }
-    return response.body;
   }
 
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
-      style: Theme.of(context).textTheme.headline2!,
-      textAlign: TextAlign.center,
-      child: FutureBuilder<String>(
-        future: getJsonFromRest(
-            "voiture"), // a previously-obtained Future<String> or null
-        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-          List<Widget> children;
-          if (snapshot.hasData) {
-            children = <Widget>[
-              const Icon(
-                Icons.check_circle_outline,
-                color: Colors.green,
-                size: 60,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Text('${snapshot.data}',
-                style: const TextStyle(fontSize: 15)),
-              )
-            ];
-          } else if (snapshot.hasError) {
-            children = <Widget>[
-              const Icon(
-                Icons.error_outline,
-                color: Colors.red,
-                size: 60,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Text('Error: ${snapshot.error}',
-                    style: const TextStyle(fontSize: 15)),
-              )
-            ];
-          } else {
-            children = const <Widget>[
-              SizedBox(
-                width: 60,
-                height: 60,
-                child: CircularProgressIndicator(),
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 16),
-                child: Text('Awaiting result...',
-                    style: const TextStyle(fontSize: 15)),
-              )
-            ];
-          }
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: children,
-            ),
-<<<<<<< Updated upstream
-          );
-        },
-=======
-            ElevatedButton(
-                onPressed: () => setState(() {
-                      _cs = currentState.loaded;
-                    }),
-                child: Text("Reset")),
-            ElevatedButton(
-                onPressed: () => setState(() {
-                  _cs = currentState.showMap;
-                }),
-                child: Text("show map")),
-          ])
-        ],
->>>>>>> Stashed changes
-      ),
+        style: Theme
+            .of(context)
+            .textTheme
+            .headline2!,
+        textAlign: TextAlign.center,
+        child: Column(children: <Widget>[
+          showCorrectWidget(),
+          ElevatedButton(
+              onPressed: () =>
+                  setState(() {
+                    _cs = currentState.loading;
+                  }),
+              child: Text("Get from Rest")),
+          ElevatedButton(
+              onPressed: () =>
+                  setState(() {
+                    _cs = currentState.loaded;
+                  }),
+              child: Text("Reset")),
+          ElevatedButton(
+              onPressed: () =>
+                  setState(() {
+                    _cs = currentState.showMap;
+                  }),
+              child: Text("show map")),
+
+        ]
+        )
     );
   }
 }
+
