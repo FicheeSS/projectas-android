@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:testiut/Interfaces/ModelInterfaces.dart';
 import 'package:testiut/Views/MapView.dart';
 import 'package:testiut/Views/ShowView.dart';
 import 'package:testiut/Views/WaitingView.dart';
+
+const ModelInterfaces MI = ModelInterfaces();
 
 void main() {
   runApp(const MyApp());
@@ -35,7 +34,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
 //List of the state of the main Window
 enum currentState {
   none,
@@ -46,13 +44,13 @@ enum currentState {
 
 class MyStatefulWidget extends StatefulWidget {
   const MyStatefulWidget({Key? key}) : super(key: key);
+
   @override
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
 }
 
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   currentState _cs = currentState.none;
-
 
   callback(currentState cs) {
     setState(() {
@@ -88,35 +86,28 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
-        style: Theme
-            .of(context)
-            .textTheme
-            .headline2!,
+        style: Theme.of(context).textTheme.headline2!,
         textAlign: TextAlign.center,
         child: Column(children: <Widget>[
-          showCorrectWidget(),
+          SizedBox(
+              height: 2 * MediaQuery.of(context).size.height / 3,
+              width: MediaQuery.of(context).size.width,
+              child: showCorrectWidget()),
           ElevatedButton(
-              onPressed: () =>
-                  setState(() {
+              onPressed: () => setState(() {
                     _cs = currentState.loading;
                   }),
               child: Text("Get from Rest")),
           ElevatedButton(
-              onPressed: () =>
-                  setState(() {
+              onPressed: () => setState(() {
                     _cs = currentState.loaded;
                   }),
               child: Text("Reset")),
           ElevatedButton(
-              onPressed: () =>
-                  setState(() {
+              onPressed: () => setState(() {
                     _cs = currentState.showMap;
                   }),
               child: Text("show map")),
-
-        ]
-        )
-    );
+        ]));
   }
 }
-
