@@ -1,0 +1,6 @@
+{
+    "helloWorld": "Bonjour Monde",
+    "getfromrest" : "Charge depuis Rest",
+    "reset" : "Reset",
+    "showmap"  :"Afficher la carte"
+}

@@ -1,0 +1,9 @@
+{
+    "helloWorld": "Hello World!",
+    "@helloWorld": {
+      "description": "The conventional newborn programmer greeting"
+    },
+    "getfromrest" : " Load from Rest",
+    "reset" : "Reset",
+    "showmap"  : "Show map"
+}

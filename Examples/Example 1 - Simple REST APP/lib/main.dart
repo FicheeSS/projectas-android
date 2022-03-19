@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:testiut/Interfaces/ModelInterfaces.dart';
 import 'package:testiut/Views/MapView.dart';
 import 'package:testiut/Views/ShowView.dart';
 import 'package:testiut/Views/WaitingView.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 const ModelInterfaces MI = ModelInterfaces();
 
@@ -22,6 +23,16 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Welcome to Flutter',
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en', ''),
+        Locale('fr', ''),
+      ],
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Welcome to Flutter'),
@@ -97,17 +108,17 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               onPressed: () => setState(() {
                     _cs = currentState.loading;
                   }),
-              child: Text("Get from Rest")),
+              child: Text(AppLocalizations.of(context)!.getfromrest)),
           ElevatedButton(
               onPressed: () => setState(() {
                     _cs = currentState.loaded;
                   }),
-              child: Text("Reset")),
+              child: Text(AppLocalizations.of(context)!.reset)),
           ElevatedButton(
               onPressed: () => setState(() {
                     _cs = currentState.showMap;
                   }),
-              child: Text("show map")),
+              child: Text(AppLocalizations.of(context)!.showmap)),
         ]));
   }
 }

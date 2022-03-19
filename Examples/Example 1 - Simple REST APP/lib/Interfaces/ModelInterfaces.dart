@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 
 enum playerType { mouton, loup }
@@ -19,7 +20,9 @@ class ModelInterfaces {
   /// return [playertype]
   playerType getPlayerType() {
     //TODO : Implement getPlayerType
-    return playerType.mouton;
+    if(kDebugMode) {//A supprimer quand l'implémentation sera prète
+      return playerType.mouton;
+    }
     throw UnimplementedError();
   }
 }
