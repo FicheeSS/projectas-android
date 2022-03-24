@@ -7,15 +7,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:http/http.dart ' as http;
 import 'package:testiut/Interfaces/ModelInterfaces.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../main.dart';
 
-class MapView extends StatelessWidget {
+class MapView extends StatefulWidget {
+  final Function(currentState cs) callbackFunction;
+
   MapController mapController = MapController(
     initMapWithUserPosition: true,
   );
-
-  MapView({Key? key}) : super(key: key);
 
   void getPositionsFromRest() async {
     var url = Uri.parse(
@@ -53,11 +55,20 @@ class MapView extends StatelessWidget {
     }
   }
 
+  MapView({Key? key, required this.callbackFunction}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() {
+    return _MapViewState();
+  }
+}
+
+class _MapViewState extends State<MapView> {
   void updateMap() async {
     for (;;) {
       var res = MI.getPlayersLocation();
       for (var pos in res) {
-        mapController.addMarker(
+        widget.mapController.addMarker(
           pos.gp!,
           markerIcon: MarkerIcon(
             icon: pos.icon!,
@@ -66,14 +77,14 @@ class MapView extends StatelessWidget {
       }
       sleep(Duration(seconds: 5));
       for (var pos in res) {
-        mapController.removeMarker(pos.gp!);
+        widget.mapController.removeMarker(pos.gp!);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    getPositionsFromRest();
+    widget.getPositionsFromRest();
     return Column(
       children: [
         SizedBox(
@@ -82,7 +93,7 @@ class MapView extends StatelessWidget {
                 ? 1000
                 : MediaQuery.of(context).size.width,
             child: OSMFlutter(
-                controller: mapController,
+                controller: widget.mapController,
                 trackMyPosition: false,
                 initZoom: 12,
                 minZoomLevel: 8,
@@ -125,7 +136,7 @@ class MapView extends StatelessWidget {
         if (MI.getPlayerType() == playerType.loup)
           ElevatedButton(
               onPressed: () => {throw UnimplementedError()},
-              child: Text("Tuer")),
+              child: Text(AppLocalizations.of(context)!.kill)),
       ],
     );
   }

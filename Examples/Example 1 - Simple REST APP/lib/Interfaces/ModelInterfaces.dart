@@ -20,9 +20,19 @@ class ModelInterfaces {
   /// return [playertype]
   playerType getPlayerType() {
     //TODO : Implement getPlayerType
-    if(kDebugMode) {//A supprimer quand l'implémentation sera prète
+    if (kDebugMode) {
+      //A supprimer quand l'implémentation sera prète
       return playerType.mouton;
     }
+    throw UnimplementedError();
+  }
+
+  ///Get all the available parties
+  ///
+  /// return [PartyTime]
+
+  List<PartyTime> getAvailablesParties() {
+    //TODO : Implement getAvailablesParties
     throw UnimplementedError();
   }
 }
@@ -32,4 +42,17 @@ class PairofGeo {
   final Icon? icon;
 
   const PairofGeo({required this.gp, required this.icon});
+}
+
+class PartyTime {
+  final String name;
+  final int distance;
+  final int nbpersonnes;
+  final int uid;
+
+  const PartyTime(
+      {required this.name,
+      required this.distance,
+      required this.nbpersonnes,
+      required this.uid});
 }

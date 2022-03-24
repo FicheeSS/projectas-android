@@ -5,5 +5,9 @@
     },
     "getfromrest" : " Load from Rest",
     "reset" : "Reset",
-    "showmap"  : "Show map"
+    "showmap"  : "Show map",
+    "kill" : "Tuer",
+    "name" : "Name",
+    "nbplayers" : "Number of players",
+    "distance" : "Distance"
 }

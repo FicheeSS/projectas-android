@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:testiut/Interfaces/ModelInterfaces.dart';
 import 'package:testiut/Views/MapView.dart';
+import 'package:testiut/Views/PartyLoader.dart';
 import 'package:testiut/Views/ShowView.dart';
 import 'package:testiut/Views/WaitingView.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -22,13 +23,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Welcome to Flutter',
+      title: 'Project Tutoré S2',
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+      showPerformanceOverlay: true,
       supportedLocales: const [
         Locale('en', ''),
         Locale('fr', ''),
@@ -51,6 +53,7 @@ enum currentState {
   loading,
   loaded,
   showMap,
+  showPartySelection,
 }
 
 class MyStatefulWidget extends StatefulWidget {
@@ -89,7 +92,10 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         );
         break;
       case currentState.showMap:
-        return MapView();
+        return MapView(callbackFunction: callback);
+        break;
+      case currentState.showPartySelection:
+        return PartyLoader(callbackFunction: callback);
         break;
     }
   }
