@@ -9,5 +9,6 @@
     "kill" : "Tuer",
     "name" : "Name",
     "nbplayers" : "Number of players",
-    "distance" : "Distance"
+    "distance" : "Distance",
+    "showSingin" : "Sing-in"
 }

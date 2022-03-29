@@ -6,5 +6,6 @@
     "kill" : "Kill",
     "name" : "Nom",
     "nbplayers" : "Nombre de joueurs",
-    "distance" : "Distance"
+    "distance" : "Distance",
+    "showSingin" : "Se connecter"
 }

@@ -10,15 +10,29 @@ import 'package:testiut/Views/ShowView.dart';
 import 'package:testiut/Views/WaitingView.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'Views/SignIn.dart';
+
 
 const ModelInterfaces MI = ModelInterfaces();
+final FirebaseAuth _auth = FirebaseAuth.instance;
+final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-void main() {
+
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
+
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +68,7 @@ enum currentState {
   loaded,
   showMap,
   showPartySelection,
+  showSingin,
 }
 
 class MyStatefulWidget extends StatefulWidget {
@@ -97,6 +112,9 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       case currentState.showPartySelection:
         return PartyLoader(callbackFunction: callback);
         break;
+      case currentState.showSingin:
+        return LoginScreen();
+        break;
     }
   }
 
@@ -125,6 +143,11 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                     _cs = currentState.showMap;
                   }),
               child: Text(AppLocalizations.of(context)!.showmap)),
+          ElevatedButton(
+              onPressed: () => setState(() {
+                _cs = currentState.showSingin;
+              }),
+              child: Text(AppLocalizations.of(context)!.showSingin)),
         ]));
   }
 }
