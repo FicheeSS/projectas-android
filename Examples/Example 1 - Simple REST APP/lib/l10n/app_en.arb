@@ -1,0 +1,17 @@
+{
+    "helloWorld": "Hello World!",
+    "@helloWorld": {
+      "description": "The conventional newborn programmer greeting"
+    },
+    "getfromrest" : " Load from Rest",
+    "reset" : "Reset",
+    "showmap"  : "Show map",
+    "play" : "Play",
+    "profile" : "Profile",
+    "quit" : "Quit",
+    "kill" : "Tuer",
+    "name" : "Name",
+    "nbplayers" : "Number of players",
+    "distance" : "Distance",
+    "showSingin" : "Sing-in"
+}
