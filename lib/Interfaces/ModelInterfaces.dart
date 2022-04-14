@@ -33,6 +33,8 @@ class ModelInterfaces {
 
   List<PartyTime> getAvailablesParties() {
     //TODO : Implement getAvailablesParties
+    List<PartyTime> pt = [PartyTime(name: "Mangemoi", distance: 12, nbpersonnes: 1, uid: 99),PartyTime(name: "Mangetoi", distance: 1, nbpersonnes: 12, uid: 99)];
+    return pt;
     throw UnimplementedError();
   }
 }

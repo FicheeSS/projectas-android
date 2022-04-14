@@ -8,7 +8,6 @@ import '../main.dart';
 
 class PartyLoader extends StatefulWidget {
   late List<PartyTime> currentParties;
-  final Function(currentState cs) callbackFunction;
 
   void selectedParty(int uid) {
     //TODO : POP ME UP PLEASE
@@ -27,7 +26,7 @@ class PartyLoader extends StatefulWidget {
     return res;
   }
 
-  PartyLoader({Key? key, required this.callbackFunction}) : super(key: key);
+  PartyLoader({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -38,15 +37,26 @@ class PartyLoader extends StatefulWidget {
 class _PartyLoaderState extends State<PartyLoader> {
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return Material(
+        child: Scaffold(
+          appBar: AppBar(title:  Text(AppLocalizations.of(context)!.partiselection,
+            style:  TextStyle(color: Colors.white),
+          ),
+            leading:  IconButton(
+              icon:  Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),),
+            body: Center(
       child: DataTable(
           showCheckboxColumn: false,
           columns: <DataColumn>[
             DataColumn(label: Text(AppLocalizations.of(context)!.name)),
             DataColumn(label: Text(AppLocalizations.of(context)!.nbplayers)),
-            DataColumn(label: Text(AppLocalizations.of(context)!.name))
+            DataColumn(label: Text(AppLocalizations.of(context)!.distance))
           ],
           rows: widget.updateTable(context)),
-    );
+    )));
   }
 }

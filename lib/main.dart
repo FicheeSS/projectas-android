@@ -1,8 +1,8 @@
-// Copyright 2018 The Flutter team. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:testiut/Interfaces/ModelInterfaces.dart';
 import 'package:testiut/Views/MapView.dart';
 import 'package:testiut/Views/PartyLoader.dart';
@@ -36,6 +36,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
       title: 'Project Tutoré S2',
       localizationsDelegates: const [
@@ -44,7 +45,7 @@ class MyApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      showPerformanceOverlay: true,
+      showPerformanceOverlay: false,
       supportedLocales: const [
         Locale('en', ''),
         Locale('fr', ''),
@@ -64,8 +65,6 @@ class MyApp extends StatelessWidget {
 //List of the state of the main Window
 enum currentState {
   none,
-  loading,
-  loaded,
   showMap,
   showPartySelection,
   showSingin,
@@ -76,10 +75,21 @@ class MyStatefulWidget extends StatefulWidget {
 
   @override
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+
 }
 
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   currentState _cs = currentState.none;
+  var ls = LoginScreen();
+  var _name = "name";
+  late AndroidDeviceInfo androidInfo ;
+  @override
+  void initState() {
+    super.initState();
+    waitforStartup();
+
+  }
+
 
   callback(currentState cs) {
     setState(() {
@@ -95,59 +105,100 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           callbackFunction: callback,
         );
         break;
-      case currentState.loading:
-        return ShowView(
-          table: "voiture",
-          callbackFunction: callback,
-        );
-        break;
-      case currentState.loaded:
-        return WaitingView(
-          callbackFunction: callback,
-        );
-        break;
       case currentState.showMap:
         return MapView(callbackFunction: callback);
         break;
       case currentState.showPartySelection:
-        return PartyLoader(callbackFunction: callback);
+        return PartyLoader();
         break;
       case currentState.showSingin:
         return LoginScreen();
         break;
     }
   }
+  final ButtonStyle style =
+  ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
 
+  void  waitforStartup() async{
+    await     ls.signInWithGoogle().then((value) => {
+      setState(()=> {
+        _name = ls.user!.displayName!
+      })
+    }).catchError((error) => {print(error)});
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    androidInfo = await deviceInfo.androidInfo;
+  }
   @override
   Widget build(BuildContext context) {
-    return DefaultTextStyle(
-        style: Theme.of(context).textTheme.headline2!,
-        textAlign: TextAlign.center,
-        child: Column(children: <Widget>[
-          SizedBox(
-              height: 2 * MediaQuery.of(context).size.height / 3,
-              width: MediaQuery.of(context).size.width,
-              child: showCorrectWidget()),
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Text(
+            'Bienvenue ' +  _name ,
+            style: TextStyle(fontSize: 30),
+          ),
+          const SizedBox(height: 30),
           ElevatedButton(
-              onPressed: () => setState(() {
-                    _cs = currentState.loading;
-                  }),
-              child: Text(AppLocalizations.of(context)!.getfromrest)),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children:[
+                Icon(Icons.play_arrow),
+                SizedBox(width: 5),
+                Text('Jouer'),
+              ],
+
+            ),
+            style: style, onPressed: () {
+              Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) =>  PartyLoader(
+            )),
+          ); },
+          ),
+          const SizedBox(height: 30),
           ElevatedButton(
-              onPressed: () => setState(() {
-                    _cs = currentState.loaded;
-                  }),
-              child: Text(AppLocalizations.of(context)!.reset)),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children:[
+                Icon(Icons.person),
+                SizedBox(width: 5),
+                Text('Profile'),
+              ],
+            ),
+            style: style,
+            onPressed: () =>showDialog<String>(
+                context: context,
+                builder: (BuildContext context) => AlertDialog(
+                  title:  Text(AppLocalizations.of(context)!.userProfile),
+                  content: Text(androidInfo.androidId!),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, 'Cancel'),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, 'OK'),
+                      child: const Text('OK'),
+                    ),
+                  ],
+                )),
+          ),
+          const SizedBox(height: 30),
           ElevatedButton(
-              onPressed: () => setState(() {
-                    _cs = currentState.showMap;
-                  }),
-              child: Text(AppLocalizations.of(context)!.showmap)),
-          ElevatedButton(
-              onPressed: () => setState(() {
-                _cs = currentState.showSingin;
-              }),
-              child: Text(AppLocalizations.of(context)!.showSingin)),
-        ]));
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children:[
+                Icon(Icons.exit_to_app),
+                SizedBox(width: 5),
+                Text('Quitter'),
+              ],
+            ),
+            style: style,
+            onPressed: () {SystemChannels.platform.invokeMethod('SystemNavigator.pop');},
+          )
+        ],
+      ),
+    );
   }
 }

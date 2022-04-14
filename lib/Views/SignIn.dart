@@ -7,15 +7,46 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:testiut/main.dart';
 
 class LoginScreen extends StatefulWidget {
-  late User _user;
+  final GlobalKey<FormState> _userLoginFormKey = GlobalKey();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  User? user ;
+
+  Future<User> signInWithGoogle() async {
+    GoogleSignInAccount? googleSignInAccount = await _googleSignIn.signIn();
+
+    GoogleSignInAuthentication googleSignInAuthentication =
+    await googleSignInAccount!.authentication;
+
+    AuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleSignInAuthentication.accessToken,
+      idToken: googleSignInAuthentication.idToken,
+    );
+
+    var authResult = await _auth.signInWithCredential(credential);
+
+    user = authResult.user!;
+
+    assert(!user!.isAnonymous);
+
+    assert(await user!.getIdToken() != null);
+
+    User currentUser = await _auth.currentUser!;
+
+    assert(user!.uid == currentUser.uid);
+
+    print("User Name: ${user!.displayName}");
+    print("User Email ${user!.email}");
+    print("User uid ${user!.uid}");
+    return currentUser;
+  }
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  GlobalKey<FormState> _userLoginFormKey = GlobalKey();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
 
   bool isSignIn = false;
   bool google = false;
@@ -56,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ))),
         onTap: () async {
-          signInWithGoogle()
+          widget.signInWithGoogle()
               .then((e) => {print("yeah")})
               .catchError((error) => {print(error)});
         },
@@ -64,32 +95,5 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Future<User> signInWithGoogle() async {
-    GoogleSignInAccount? googleSignInAccount = await _googleSignIn.signIn();
 
-    GoogleSignInAuthentication googleSignInAuthentication =
-        await googleSignInAccount!.authentication;
-
-    AuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: googleSignInAuthentication.accessToken,
-      idToken: googleSignInAuthentication.idToken,
-    );
-
-    var authResult = await _auth.signInWithCredential(credential);
-
-    widget._user = authResult.user!;
-
-    assert(!widget._user.isAnonymous);
-
-    assert(await widget._user.getIdToken() != null);
-
-    User currentUser = await _auth.currentUser!;
-
-    assert(widget._user.uid == currentUser.uid);
-
-    print("User Name: ${widget._user.displayName}");
-    print("User Email ${widget._user.email}");
-    print("User uid ${widget._user.uid}");
-    return currentUser;
-  }
 }

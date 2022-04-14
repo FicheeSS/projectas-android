@@ -7,5 +7,7 @@
     "name" : "Nom",
     "nbplayers" : "Nombre de joueurs",
     "distance" : "Distance",
-    "showSingin" : "Se connecter"
+    "showSingin" : "Se connecter",
+    "userProfile" : "Profil Utilisateur",
+    "partiselection" : "Selectionner la party"
 }

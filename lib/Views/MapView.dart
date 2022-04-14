@@ -89,7 +89,7 @@ class _MapViewState extends State<MapView> {
       children: [
         SizedBox(
             height: MediaQuery.of(context).size.height / 2,
-            width: (MediaQuery.of(context).size.width > 1000)
+              width: (MediaQuery.of(context).size.width > 1000)
                 ? 1000
                 : MediaQuery.of(context).size.width,
             child: OSMFlutter(

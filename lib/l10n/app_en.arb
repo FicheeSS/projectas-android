@@ -10,5 +10,7 @@
     "name" : "Name",
     "nbplayers" : "Number of players",
     "distance" : "Distance",
-    "showSingin" : "Sing-in"
+    "showSingin" : "Sing-in",
+    "userProfile" : "User Profile",
+    "partiselection" : "Select a Party"
 }
