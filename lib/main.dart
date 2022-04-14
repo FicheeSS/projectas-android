@@ -195,8 +195,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               ],
             ),
             style: style,
-            onPressed: () {SystemChannels.platform.invokeMethod('SystemNavigator.pop');},
-          )
+            onPressed: () {SystemChannels.platform.invokeMethod('SystemNavigator.pop');},//suicide
+          ), //LoginScreen()
         ],
       ),
     );
