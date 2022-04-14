@@ -28,10 +28,17 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   flutter_osm_plugin: ^0.32.0
+  tuple: ^2.0.0
   flutter:
     sdk: flutter
-
-
+  #Add support for localization
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.17.0
+  firebase_auth: ^3.1.0
+  google_sign_in: ^5.2.4
+  #oauth2_client: ^2.3.3
+  device_info_plus: ^3.2.3
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -42,6 +49,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  http : ^0.13.4
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -55,11 +63,14 @@ dev_dependencies:
 
 # The following section is specific to Flutter.
 flutter:
-
+  generate : true
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - assets/
 
   # To add assets to your application, add an assets section, like this:
   # assets:
@@ -91,3 +102,5 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+assets:
+  - assets/

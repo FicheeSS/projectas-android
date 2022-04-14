@@ -1,0 +1,13 @@
+{
+    "helloWorld": "Bonjour Monde",
+    "getfromrest" : "Charge depuis Rest",
+    "reset" : "Reset",
+    "showmap"  :"Afficher la carte",
+    "kill" : "Kill",
+    "name" : "Nom",
+    "nbplayers" : "Nombre de joueurs",
+    "distance" : "Distance",
+    "showSingin" : "Se connecter",
+    "userProfile" : "Profil Utilisateur",
+    "partiselection" : "Selectionner la party"
+}

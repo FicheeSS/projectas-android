@@ -1,4 +1,4 @@
-#Project AS Android
+# EXAMPLE 1 - Simple REST APP
 
-lien : trello
-https://trello.com/invite/projetanneespeciale/3d459a936d2eff8d0d877fc135c22a05
+## How to use
+    Enter your credential at line 47 and enjoy !
