@@ -12,5 +12,7 @@
     "distance" : "Distance",
     "showSingin" : "Sing-in",
     "userProfile" : "User Profile",
-    "partiselection" : "Select a Party"
+    "partiselection" : "Select a Party",
+    "warn" :"Warning !",
+    "surequit" : "Are you sure you want to quit ?"
 }

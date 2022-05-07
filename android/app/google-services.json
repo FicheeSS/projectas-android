@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "557792261034-a4ae8o86rfe6ns1rplbqaqjpqhbfh1b5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.iut.projectasCashCash",
+            "certificate_hash": "6e5b864168c500a22e41806609d41c632a8d2919"
+          }
+        },
+        {
           "client_id": "557792261034-amuea0eq0ugc6ik357859nbk6c2a3v8d.apps.googleusercontent.com",
           "client_type": 3
         }

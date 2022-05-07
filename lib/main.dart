@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
@@ -15,6 +16,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'Views/SignIn.dart';
+import 'package:http/http.dart' as http;
 
 
 const ModelInterfaces MI = ModelInterfaces();
@@ -27,6 +29,9 @@ void main() async{
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp
+  ]);
   runApp(const MyApp());
 }
 
@@ -39,6 +44,9 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       title: 'Project Tutoré S2',
+      routes: {
+        '/playing' : (context) =>  MapView()
+      },
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -106,7 +114,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         );
         break;
       case currentState.showMap:
-        return MapView(callbackFunction: callback);
+        return MapView();
         break;
       case currentState.showPartySelection:
         return PartyLoader();
@@ -127,6 +135,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     }).catchError((error) => {print(error)});
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     androidInfo = await deviceInfo.androidInfo;
+
   }
   @override
   Widget build(BuildContext context) {
@@ -140,16 +149,18 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           ),
           const SizedBox(height: 30),
           ElevatedButton(
+
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children:[
                 Icon(Icons.play_arrow),
                 SizedBox(width: 5),
                 Text('Jouer'),
+
               ],
 
             ),
-            style: style, onPressed: () {
+            style: style, onPressed: _name == "name" ? null : () {
               Navigator.push(
             context,
             MaterialPageRoute(builder: (context) =>  PartyLoader(
@@ -188,7 +199,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           ElevatedButton(
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              children:[
+              children:const [
                 Icon(Icons.exit_to_app),
                 SizedBox(width: 5),
                 Text('Quitter'),

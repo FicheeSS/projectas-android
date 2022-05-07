@@ -4,13 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:testiut/Interfaces/ModelInterfaces.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:testiut/tools/PlayingArguments.dart';
 import '../main.dart';
 
 class PartyLoader extends StatefulWidget {
   late List<PartyTime> currentParties;
 
-  void selectedParty(int uid) {
-    //TODO : POP ME UP PLEASE
+  void selectedParty(int uid,BuildContext context) {
+    Navigator.pushNamed(context, '/playing',arguments: PlayingArgument(uid));
   }
 
   List<DataRow> updateTable(BuildContext context) {
@@ -21,7 +22,7 @@ class PartyLoader extends StatefulWidget {
         DataCell(Text(c.name)),
         DataCell(Text(c.nbpersonnes.toString())),
         DataCell(Text(c.distance.toString()))
-      ], onSelectChanged: (val) => {selectedParty(c.uid)}));
+      ], onSelectChanged: (val) => {selectedParty(c.uid, context )}));
     }
     return res;
   }

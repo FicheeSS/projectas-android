@@ -9,5 +9,9 @@
     "distance" : "Distance",
     "showSingin" : "Se connecter",
     "userProfile" : "Profil Utilisateur",
-    "partiselection" : "Selectionner la party"
+    "partiselection" : "Selectionner la party",
+        "warn" :"Attention !",
+            "surequit" : "Voulez-vous vraiment quitter ?"
+
+
 }
