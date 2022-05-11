@@ -14,5 +14,7 @@
     "userProfile" : "User Profile",
     "partiselection" : "Select a Party",
     "warn" :"Warning !",
-    "surequit" : "Are you sure you want to quit ?"
+    "surequit" : "Are you sure you want to quit ?",
+    "competence" : "Ability",
+    "title" : "Tutored Project S2"
 }

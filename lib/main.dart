@@ -60,7 +60,7 @@ class MyApp extends StatelessWidget {
       ],
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Welcome to Flutter'),
+          title:  Text("Project Tutoré S2"),
         ),
         body: const Center(
           child: MyStatefulWidget(),
@@ -160,7 +160,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               ],
 
             ),
-            style: style, onPressed: _name == "name" ? null : () {
+            style: style,
+            onPressed: _name == "name" ? null : () {
               Navigator.push(
             context,
             MaterialPageRoute(builder: (context) =>  PartyLoader(

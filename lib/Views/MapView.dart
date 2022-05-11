@@ -36,7 +36,7 @@ class _MapViewState extends State<MapView> {
       //'Authorization' : 'basic $cred',
       'Accept': 'application/json',
     });
-    sleep(const Duration(seconds: 1));
+
     if (kDebugMode) {
       print(response.body);
     }
@@ -65,7 +65,6 @@ class _MapViewState extends State<MapView> {
       );
     }
   }
-
   void updateMap() async {
     for (;;) {
       var res = MI.getPlayersLocation();
@@ -86,6 +85,26 @@ class _MapViewState extends State<MapView> {
   void returnToStart(){
     Navigator.pushNamed(context, "/");
     dispose();
+  }
+  Widget createPlayerControls(BuildContext context){
+    if (MI.getPlayerType() == playerType.loup){
+     return  Row(
+       children: [
+         ElevatedButton(
+              onPressed: () => {throw UnimplementedError()},
+              child: Text(AppLocalizations.of(context)!.kill)),
+         ElevatedButton(onPressed: () => {throw UnimplementedError()}, child: Text(AppLocalizations.of(context)!.competence))
+       ],
+     );
+  }
+    else{
+      return Row(
+        children: [
+          ElevatedButton(onPressed: () => {throw UnimplementedError()}, child: Text(AppLocalizations.of(context)!.competence))
+          ,
+        ],
+      );
+    }
   }
   late MapController mapController;
   late Timer _timer;
@@ -183,11 +202,14 @@ class _MapViewState extends State<MapView> {
                           size: 56,
                         ),
                       )))),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height / 4,
+                    width: (MediaQuery.of(context).size.width > 1000)
+                        ? 1000
+                        : MediaQuery.of(context).size.width,
+                    child: createPlayerControls(context),
+                  )
 
-            if (MI.getPlayerType() == playerType.loup)
-              ElevatedButton(
-                  onPressed: () => {throw UnimplementedError()},
-                  child: Text(AppLocalizations.of(context)!.kill)),
           ],
         ),
       ),

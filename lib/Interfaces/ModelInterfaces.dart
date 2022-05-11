@@ -14,6 +14,12 @@ class ModelInterfaces {
     // TODO: implement getPlayersLocation
     throw UnimplementedError();
   }
+  ///Return the abilities of the current player
+  ///
+  /// return [List<Abilities>]
+  List<Abilities> getPlayerAbilities(){
+    throw UnimplementedError();
+  }
 
   ///Get the player type
   ///
@@ -39,6 +45,13 @@ class ModelInterfaces {
   }
 }
 
+class Abilities{
+  final String? nom;
+  final String? desc;
+
+  Abilities({required this.nom, this.desc});
+
+}
 class PairofGeo {
   final GeoPoint? gp;
   final Icon? icon;
