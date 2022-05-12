@@ -87,23 +87,38 @@ class _MapViewState extends State<MapView> {
     Navigator.pushNamed(context, "/");
     dispose();
   }
-  Widget createPlayerControls(BuildContext context){
-    if (MI.getPlayerType() == playerType.loup){
-     return  Row(
-       children: [
-         ElevatedButton(
-              onPressed: () => {throw UnimplementedError()},
-              child: Text(AppLocalizations.of(context)!.kill)),
-         ElevatedButton(onPressed: () => {throw UnimplementedError()}, child: Text(AppLocalizations.of(context)!.competence))
-       ],
-     );
+
+  /// return the abilities get with getPlayerAbilities to dispay on screen
+  ///
+  /// return List<ElevatedButton>
+  List<ElevatedButton> updateAbilities(BuildContext context){
+    List<Abilities> listesAbilite = MI.getPlayerAbilities();
+    List<ElevatedButton> temp = [];
+    for(int i=0;i<listesAbilite.length;i++){
+      temp.add(ElevatedButton(onPressed: ()=>{throw UnimplementedError()}, child: Text(listesAbilite[i].nom!)));
+    }
+    return temp;
   }
+
+  Widget createPlayerControls(BuildContext context){
+    //List<Abilities> listAbilities = MI.getPlayerAbilities();
+    if (MI.getPlayerType() == playerType.loup) {
+        return Row(
+          children: [
+            ElevatedButton(
+                onPressed: () => {throw UnimplementedError()},
+                child: Text(AppLocalizations.of(context)!.kill)),
+            ElevatedButton(onPressed: () => {throw UnimplementedError()},
+                child: Text(AppLocalizations.of(context)!.competence))
+          ],
+        );
+    }
     else{
       return Row(
-        children: [
+        children: updateAbilities(context),/*[
           ElevatedButton(onPressed: () => {throw UnimplementedError()}, child: Text(AppLocalizations.of(context)!.competence))
           ,
-        ],
+        ],*/
       );
     }
   }
