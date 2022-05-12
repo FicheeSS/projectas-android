@@ -6,10 +6,17 @@ enum playerType { mouton, loup }
 
 class ModelInterfaces {
   const ModelInterfaces();
+
+  ///Notify the api that the player is participating or not depenting on the bool
+  void updatePlayerParticipation(bool isParticipating){
+
+  }
+
+
+
   ///Update the user with the provided position
   ///
   /// Use : [GeoPoint] the user location
-
 
   void updatePlayerLocation(GeoPoint gp){
     //TODO: implement updatePlayerLocation
