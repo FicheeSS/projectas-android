@@ -34,7 +34,9 @@ class ModelInterfaces {
   ///
   /// return [List<Abilities>]
   List<Abilities> getPlayerAbilities(){
-    throw UnimplementedError();
+    // throw UnimplementedError();
+    List<Abilities> temp = [Abilities(nom:"Manger",desc:"Bah tu mange frr",cd:5),Abilities(nom: "Dormir",desc: "bah du dors",cd: 2)];
+    return temp;
   }
 
   ///Get the player type
@@ -64,8 +66,9 @@ class ModelInterfaces {
 class Abilities{
   final String? nom;
   final String? desc;
+  final int? cd;
 
-  Abilities({required this.nom, this.desc});
+  Abilities({required this.nom, this.desc, required this.cd});
 
 }
 class PlayerLocation {
