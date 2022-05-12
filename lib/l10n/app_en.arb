@@ -20,5 +20,6 @@
     "readyTitle" : "Player readiness",
         "ready" : "ready",
         "notready" : "not ready",
-    "play" : "Play"
+    "play" : "Play",
+    "errorTitle" : "An error occured"
 }

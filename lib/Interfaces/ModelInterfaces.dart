@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
@@ -7,9 +9,19 @@ enum playerType { mouton, loup }
 class ModelInterfaces {
   const ModelInterfaces();
 
+
+  ///Return the reason why we cannot connect to the api, null otherwise
+  Exception? tryConnectToApi(){
+    return null;
+    //return TimeoutException("Cannot connect in time");
+
+
+  }
+
   ///Notify the api that the player is participating or not depenting on the  bool
   ///
-  /// Return is the player can participate
+  /// Return if the player can participate
+  /// Return is discarded if [isParticipating] is false
   bool updatePlayerParticipation(bool isParticipating){
       return true;
   }

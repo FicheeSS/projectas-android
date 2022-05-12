@@ -17,7 +17,8 @@
     "readyTitle" : "U rdy ?",
     "ready" : "pres",
     "notready" : "pas pres",
-    "play" : "Jouer"
+    "play" : "Jouer",
+    "errorTitle" : "OMG c'est une error"
 
 
 

@@ -18,6 +18,7 @@ class LobbyState extends State<Lobby> {
   List<DataRow> currentPartiesData = [];
   late Timer _timer;
   late int partyId;
+  ///go to the next page with the provided party id
   void selectedParty(int uid, BuildContext context) {
     Navigator.pushNamed(context, '/playing', arguments: PlayingArgument(uid));
   }
@@ -27,7 +28,7 @@ class LobbyState extends State<Lobby> {
   ///Update the table of the registered players
   void updateTable() {
 
-    if(!mounted){return;}
+    if(!mounted){return;}//make sure the widget exist before modifying it
     currentParties = MI.getAllPlayerInLobby(partyId);
     List<DataRow> res = [];
     bool rdy = true;
@@ -50,8 +51,9 @@ class LobbyState extends State<Lobby> {
     });
   }
 
+  ///Go back to the party selection screen
   void goBack() {
-    _timer.cancel();
+    MI.updatePlayerParticipation(false);
     Navigator.pop(context);
   }
 
@@ -98,5 +100,11 @@ class LobbyState extends State<Lobby> {
         ),
       ),
     );
+  }
+  @override
+  void dispose(){
+    //make sure to cancel the timer otherwise it will call the callback function even with the widget disposed of
+    _timer.cancel();
+    super.dispose();
   }
 }

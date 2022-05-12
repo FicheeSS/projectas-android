@@ -28,8 +28,9 @@ class MapView extends StatefulWidget {
 
 class _MapViewState extends State<MapView> {
   int uid = 0;
-
+///TODO : ENLERVER TEMPORAIRE TANT QUE PAS DE CO A API
   void getPositionsFromRest(MapController mapController) async {
+    if(!mounted){return;}//makes sure the widget exist before modifing it
     var url = Uri.parse(
         "https://projets.iut-orsay.fr/prj-as-2022/Examples/rest.php?position");
     final response = await http.get(url, headers: {
@@ -65,7 +66,9 @@ class _MapViewState extends State<MapView> {
       );
     }
   }
+  ///Update the [mapController] with the new player locations
   void updateMap() async {
+    if(!mounted){return;}//makes sure the widget exist before modifing it
     for (;;) {
       var res = MI.getPlayersLocation();
       for (var pos in res) {
@@ -82,13 +85,14 @@ class _MapViewState extends State<MapView> {
       }
     }
   }
+  ///Clear everything before going back to the start
   void returnToStart(){
     MI.updatePlayerParticipation(false);
     Navigator.pushNamed(context, "/");
     dispose();
   }
 
-  /// return the abilities get with getPlayerAbilities to dispay on screen
+  /// return the abilities get with getPlayerAbilities to display on screen
   ///
   /// return List<ElevatedButton>
   List<ElevatedButton> updateAbilities(BuildContext context){
@@ -99,7 +103,7 @@ class _MapViewState extends State<MapView> {
     }
     return temp;
   }
-
+///Create the widget tree with the corresponding player actions
   Widget createPlayerControls(BuildContext context){
     //List<Abilities> listAbilities = MI.getPlayerAbilities();
     if (MI.getPlayerType() == playerType.loup) {
@@ -124,6 +128,7 @@ class _MapViewState extends State<MapView> {
   }
   late MapController mapController;
   late Timer _timer;
+
   @override
   Widget build(BuildContext context) {
 
@@ -190,7 +195,7 @@ class _MapViewState extends State<MapView> {
                           icon: Icon(
                             Icons.location_history_rounded,
                             color: Colors.red,
-                            size: 48,
+                            size: 150,
                           ),
                         ),
                         directionArrowMarker: const MarkerIcon(
@@ -219,10 +224,6 @@ class _MapViewState extends State<MapView> {
                         ),
                       )))),
                   SizedBox(
-                    height: MediaQuery.of(context).size.height / 4,
-                    width: (MediaQuery.of(context).size.width > 1000)
-                        ? 1000
-                        : MediaQuery.of(context).size.width,
                     child: createPlayerControls(context),
                   )
 
@@ -233,6 +234,7 @@ class _MapViewState extends State<MapView> {
   }
   @override
   void dispose(){
+    //make sure to cancel the timer otherwise it will call the callback function even with the widget disposed of
     _timer.cancel();
     super.dispose();
   }

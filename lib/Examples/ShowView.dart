@@ -7,9 +7,8 @@ import '../main.dart';
 
 class ShowView extends StatelessWidget {
   final String table;
-  final Function(currentState cs) callbackFunction;
 
-  ShowView({Key? key, required this.table, required this.callbackFunction})
+  ShowView({Key? key, required this.table})
       : super(key: key);
 
   @override
@@ -87,7 +86,7 @@ class ShowView extends StatelessWidget {
       if (kDebugMode) {
         print("bruh moment");
       }
-      throw const FormatException("Error");
+      throw  FormatException("Error",url);
     }
     return response.body;
   }
