@@ -6,11 +6,20 @@ enum playerType { mouton, loup }
 
 class ModelInterfaces {
   const ModelInterfaces();
+  ///Update the user with the provided position
+  ///
+  /// Use : [GeoPoint] the user location
 
-  ///Return the all the player location as specified in [PairofGeo]
+
+  void updatePlayerLocation(GeoPoint gp){
+    //TODO: implement updatePlayerLocation
+    throw UnimplementedError();
+  }
+
+  ///Return the all the player location as specified in [PlayerLocation]
   ///
   /// throws TBD
-  List<PairofGeo> getPlayersLocation() {
+  List<PlayerLocation> getPlayersLocation() {
     // TODO: implement getPlayersLocation
     throw UnimplementedError();
   }
@@ -52,11 +61,12 @@ class Abilities{
   Abilities({required this.nom, this.desc});
 
 }
-class PairofGeo {
+class PlayerLocation {
   final GeoPoint? gp;
   final Icon? icon;
+  final int? idPlayer;
 
-  const PairofGeo({required this.gp, required this.icon});
+  const PlayerLocation({required this.gp, required this.icon,required this.idPlayer});
 }
 
 class PartyTime {
