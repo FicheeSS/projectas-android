@@ -7,9 +7,11 @@ enum playerType { mouton, loup }
 class ModelInterfaces {
   const ModelInterfaces();
 
-  ///Notify the api that the player is participating or not depenting on the bool
-  void updatePlayerParticipation(bool isParticipating){
-
+  ///Notify the api that the player is participating or not depenting on the  bool
+  ///
+  /// Return is the player can participate
+  bool updatePlayerParticipation(bool isParticipating){
+      return true;
   }
 
 
@@ -49,10 +51,18 @@ class ModelInterfaces {
     throw UnimplementedError();
   }
 
+  ///Get all the player
+  ///
+  /// return [LobbyPlayer[]]
+
+  List<LobbyPlayer> getAllPlayerInLobby(int partyId){
+    return [LobbyPlayer(name: "bruh", isReady:true),LobbyPlayer(name: "bruh2", isReady:true)];
+    throw UnimplementedError();
+  }
+
   ///Get all the available parties
   ///
-  /// return [PartyTime]
-
+  /// return [PartyTime[]]
   List<PartyTime> getAvailablesParties() {
     //TODO : Implement getAvailablesParties
     List<PartyTime> pt = [PartyTime(name: "Mangemoi", distance: 12, nbpersonnes: 1, uid: 99),PartyTime(name: "Mangetoi", distance: 1, nbpersonnes: 12, uid: 99)];
@@ -87,4 +97,11 @@ class PartyTime {
       required this.distance,
       required this.nbpersonnes,
       required this.uid});
+}
+
+class LobbyPlayer{
+  final String name;
+  final bool isReady;
+
+  LobbyPlayer({required this.name, required this.isReady});
 }

@@ -11,7 +11,8 @@ class PartyLoader extends StatefulWidget {
   late List<PartyTime> currentParties;
 
   void selectedParty(int uid,BuildContext context) {
-    Navigator.pushNamed(context, '/playing',arguments: PlayingArgument(uid));
+    if( !MI.updatePlayerParticipation(true)){return;}
+    Navigator.pushNamed(context, '/lobby',arguments: PlayingArgument(uid));
   }
 
   List<DataRow> updateTable(BuildContext context) {

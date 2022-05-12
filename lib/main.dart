@@ -5,6 +5,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:testiut/Interfaces/ModelInterfaces.dart';
+import 'package:testiut/Views/Lobby.dart';
 import 'package:testiut/Views/MapView.dart';
 import 'package:testiut/Views/PartyLoader.dart';
 import 'package:testiut/Views/ShowView.dart';
@@ -45,7 +46,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Project Tutoré S2',
       routes: {
-        '/playing' : (context) =>  MapView()
+        '/playing' : (context) =>  MapView(),
+        '/lobby' : (context) => Lobby()
       },
       localizationsDelegates: const [
         AppLocalizations.delegate,

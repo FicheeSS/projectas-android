@@ -83,6 +83,7 @@ class _MapViewState extends State<MapView> {
     }
   }
   void returnToStart(){
+    MI.updatePlayerParticipation(false);
     Navigator.pushNamed(context, "/");
     dispose();
   }
