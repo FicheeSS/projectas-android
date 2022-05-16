@@ -14,6 +14,7 @@ class ModelInterfaces {
     // TODO: implement getPlayersLocation
     throw UnimplementedError();
   }
+
   ///Return the abilities of the current player
   ///
   /// return [List<Abilities>]
@@ -30,7 +31,7 @@ class ModelInterfaces {
     //TODO : Implement getPlayerType
     if (kDebugMode) {
       //A supprimer quand l'implémentation sera prète
-      return playerType.mouton;
+      return playerType.loup;
     }
     throw UnimplementedError();
   }

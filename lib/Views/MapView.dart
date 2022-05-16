@@ -100,25 +100,32 @@ class _MapViewState extends State<MapView> {
   }
 
   Widget createPlayerControls(BuildContext context){
+    ElevatedButton btnKill = ElevatedButton(onPressed: ()=>{}, child: Text(AppLocalizations.of(context)!.kill));
+    Timer _timerKill = Timer.periodic(const Duration(seconds: 5), (timer) =>{if(btnKill.onPressed=="null")});
     //List<Abilities> listAbilities = MI.getPlayerAbilities();
     if (MI.getPlayerType() == playerType.loup) {
-        return Row(
+        return Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             ElevatedButton(
+              style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Colors.red)),
                 onPressed: () => {throw UnimplementedError()},
                 child: Text(AppLocalizations.of(context)!.kill)),
             ElevatedButton(onPressed: () => {throw UnimplementedError()},
                 child: Text(AppLocalizations.of(context)!.competence))
           ],
-        );
+        ));
     }
     else{
-      return Row(
+      return Center(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
         children: updateAbilities(context),/*[
           ElevatedButton(onPressed: () => {throw UnimplementedError()}, child: Text(AppLocalizations.of(context)!.competence))
           ,
         ],*/
-      );
+      ));
     }
   }
   late MapController mapController;
