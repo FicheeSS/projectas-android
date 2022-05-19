@@ -98,22 +98,28 @@ class _MapViewState extends State<MapView> {
     }
     return temp;
   }
+  bool isKillEnable = true;
+  void _startTimer(){
+    setState(() {
+      isKillEnable=false;
+    });
+  }
 
   Widget createPlayerControls(BuildContext context){
-    ElevatedButton btnKill = ElevatedButton(onPressed: ()=>{}, child: Text(AppLocalizations.of(context)!.kill));
-    Timer _timerKill = Timer.periodic(const Duration(seconds: 5), (timer) =>{if(btnKill.onPressed=="null")});
+    Timer timer = Timer(const Duration(seconds: 5), () =>{setState(()=>{isKillEnable=true})});
+    ElevatedButton btnKill = ElevatedButton(
+        style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Colors.red)),
+        onPressed: isKillEnable ? _startTimer : null,
+        //onPressed: null,
+        child: Text(AppLocalizations.of(context)!.kill)
+    );
     //List<Abilities> listAbilities = MI.getPlayerAbilities();
     if (MI.getPlayerType() == playerType.loup) {
         return Center(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ElevatedButton(
-              style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Colors.red)),
-                onPressed: () => {throw UnimplementedError()},
-                child: Text(AppLocalizations.of(context)!.kill)),
-            ElevatedButton(onPressed: () => {throw UnimplementedError()},
-                child: Text(AppLocalizations.of(context)!.competence))
+            btnKill, // Elevated btn kill
           ],
         ));
     }
