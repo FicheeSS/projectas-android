@@ -5,17 +5,15 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:testiut/Interfaces/ModelInterfaces.dart';
-import 'package:testiut/Views/Lobby.dart';
 import 'package:testiut/Views/MapView.dart';
 import 'package:testiut/Views/PartyLoader.dart';
-import 'package:testiut/Examples/ShowView.dart';
-import 'package:testiut/Examples/WaitingView.dart';
+import 'package:testiut/Views/ShowView.dart';
+import 'package:testiut/Views/WaitingView.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:testiut/tools/RandomGarbage.dart';
 import 'firebase_options.dart';
 import 'Views/SignIn.dart';
 import 'package:http/http.dart' as http;
@@ -25,7 +23,7 @@ const ModelInterfaces MI = ModelInterfaces();
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-///Entrypoint
+
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -46,9 +44,8 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       title: 'Project Tutoré S2',
-      routes: {// all the route to the necessary screens
-        '/playing' : (context) =>  MapView(),
-        '/lobby' : (context) => Lobby()
+      routes: {
+        '/playing' : (context) =>  MapView()
       },
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -73,7 +70,13 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
+//List of the state of the main Window
+enum currentState {
+  none,
+  showMap,
+  showPartySelection,
+  showSingin,
+}
 
 class MyStatefulWidget extends StatefulWidget {
   const MyStatefulWidget({Key? key}) : super(key: key);
@@ -84,12 +87,10 @@ class MyStatefulWidget extends StatefulWidget {
 }
 
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+  currentState _cs = currentState.none;
   var ls = LoginScreen();
   var _name = "name";
   late AndroidDeviceInfo androidInfo ;
-  Exception? connectionError;
-
-  ///Initialize the state and start the required services
   @override
   void initState() {
     super.initState();
@@ -98,9 +99,34 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   }
 
 
+  callback(currentState cs) {
+    setState(() {
+      _cs = cs;
+    });
+  }
+
+//Select the correct view for the job from [_cs]
+  Widget showCorrectWidget() {
+    switch (_cs) {
+      case currentState.none:
+        return WaitingView(
+          callbackFunction: callback,
+        );
+        break;
+      case currentState.showMap:
+        return MapView();
+        break;
+      case currentState.showPartySelection:
+        return PartyLoader();
+        break;
+      case currentState.showSingin:
+        return LoginScreen();
+        break;
+    }
+  }
   final ButtonStyle style =
   ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
-///Create a wait thread for the connection to the required services
+
   void  waitforStartup() async{
     await     ls.signInWithGoogle().then((value) => {
       setState(()=> {
@@ -109,11 +135,11 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     }).catchError((error) => {print(error)});
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     androidInfo = await deviceInfo.androidInfo;
-    connectionError = MI.tryConnectToApi();
+
   }
   @override
   Widget build(BuildContext context) {
-    return connectionError == null ? Center(
+    return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -185,6 +211,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           ), //LoginScreen()
         ],
       ),
-    ) : ShowErrorDialog(e: connectionError!);
+    );
   }
 }

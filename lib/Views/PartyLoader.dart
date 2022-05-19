@@ -10,13 +10,10 @@ import '../main.dart';
 class PartyLoader extends StatefulWidget {
   late List<PartyTime> currentParties;
 
-  ///The user as selected a party we try to connect to it and go to the lobby
   void selectedParty(int uid,BuildContext context) {
-    if( !MI.updatePlayerParticipation(true)){return;}
-    Navigator.pushNamed(context, '/lobby',arguments: PlayingArgument(uid));
+    Navigator.pushNamed(context, '/playing',arguments: PlayingArgument(uid));
   }
 
-  ///create the table with all the party in the db
   List<DataRow> updateTable(BuildContext context) {
     currentParties = MI.getAvailablesParties();
     List<DataRow> res = [];
