@@ -94,33 +94,36 @@ class _MapViewState extends State<MapView> {
     List<Abilities> listesAbilite = MI.getPlayerAbilities();
     List<ElevatedButton> temp = [];
     for(int i=0;i<listesAbilite.length;i++){
-      temp.add(ElevatedButton(onPressed: ()=>{throw UnimplementedError()}, child: Text(listesAbilite[i].nom!)));
+      temp.add(ElevatedButton(onPressed: ()=>{}, child: Text(listesAbilite[i].nom!)));
     }
     return temp;
   }
   bool isKillEnable = true;
-  void _startTimer(){
-    setState(() {
-      isKillEnable=false;
+  late Timer _timerKill;
+
+  void fctCallBack(){
+    _timerKill = Timer(const Duration(seconds: 5), () =>
+    {
+      setState(() => {isKillEnable = true, _timerKill.cancel()})
     });
+    setState(() => {isKillEnable = false});
   }
 
   Widget createPlayerControls(BuildContext context){
-    Timer timer = Timer(const Duration(seconds: 5), () =>{setState(()=>{isKillEnable=true})});
+    //Timer timer = Timer(const Duration(seconds: 5), () =>{setState(()=>{isKillEnable=true})});
     ElevatedButton btnKill = ElevatedButton(
         style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Colors.red)),
-        onPressed: isKillEnable ? _startTimer : null,
-        //onPressed: null,
+        onPressed: isKillEnable ? ()=> {setState(()=>{isKillEnable=false})}: null,
         child: Text(AppLocalizations.of(context)!.kill)
     );
     //List<Abilities> listAbilities = MI.getPlayerAbilities();
+    var listeBtn = updateAbilities(context);
     if (MI.getPlayerType() == playerType.loup) {
+      listeBtn.add(btnKill);
         return Center(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            btnKill, // Elevated btn kill
-          ],
+          children: listeBtn,
         ));
     }
     else{
@@ -134,6 +137,19 @@ class _MapViewState extends State<MapView> {
       ));
     }
   }
+  
+  //fct callback du timer
+  void fctCB(){
+    getPositionsFromRest(mapController);
+    if(count++>2&&!isKillEnable){
+      setState(() {
+        count=0;
+        isKillEnable=true;
+      });
+    }
+  }
+  
+  int count=0;
   late MapController mapController;
   late Timer _timer;
   @override
@@ -147,8 +163,7 @@ class _MapViewState extends State<MapView> {
     mapController =   MapController(
       initMapWithUserPosition: true,
     );
-
-    _timer = Timer.periodic(const Duration(seconds: 5), (timer) =>{getPositionsFromRest(mapController) });
+    _timer = Timer.periodic(const Duration(seconds: 5), (timer) =>{getPositionsFromRest(mapController), if(count++>2&&!isKillEnable){setState(()=>{count=0, isKillEnable=true}) }});
     return WillPopScope(
       onWillPop: () async {
         return false;
