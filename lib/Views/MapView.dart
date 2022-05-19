@@ -36,7 +36,7 @@ class _MapViewState extends State<MapView> {
     final response = await http.get(url, headers: {
       //'Authorization' : 'basic $cred',
       'Accept': 'application/json',
-    });
+    }).catchError((error) => { print("erreur" + error.toString())});
 
     if (kDebugMode) {
       print(response.body);

@@ -92,7 +92,7 @@ class LobbyState extends State<Lobby> {
               ], rows: currentPartiesData),
               ElevatedButton(
                   onPressed: areUReadyToDoThis
-                      ?() {selectedParty(partyId, context);}
+                        ?() {selectedParty(partyId, context);}
                       : null,
                   child: Text(AppLocalizations.of(context)!.play))
             ]),

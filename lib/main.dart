@@ -8,8 +8,6 @@ import 'package:testiut/Interfaces/ModelInterfaces.dart';
 import 'package:testiut/Views/Lobby.dart';
 import 'package:testiut/Views/MapView.dart';
 import 'package:testiut/Views/PartyLoader.dart';
-import 'package:testiut/Examples/ShowView.dart';
-import 'package:testiut/Examples/WaitingView.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -104,9 +102,10 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   void  waitforStartup() async{
     await     ls.signInWithGoogle().then((value) => {
       setState(()=> {
-        _name = ls.user!.displayName!
+        _name = ls.user!.displayName!,
+       MI.setIdUser(ls.user!.uid)
       })
-    }).catchError((error) => {print(error)});
+    }).catchError((error) => {connectionError = error});
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     androidInfo = await deviceInfo.androidInfo;
     connectionError = MI.tryConnectToApi();
