@@ -114,12 +114,7 @@ class ModelInterfaces {
             print("Erreur de retour API : code erreur = " + response.statusCode.toString() );
           }
           throw Exception('code erreur : ' + response.statusCode.toString() );
-          /*
-            print(response.reasonPhrase);
-            var messageM = jsonDecode(utf8.decode(response.bodyBytes));
-            print(messageM);
-            return List<PlayerLocation(GeoPoint geo,Icon icon,int 0)>(); //Retourne liste vide
-          */
+
         }
   }
 
