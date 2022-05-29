@@ -6,11 +6,7 @@ class Abilities {
   int? _cd;
 
 
-  Constructeur(String nom){
-    _nom = nom;
-  }
-
-  Contructeur(String nom,String desc,int cd){
+  Abilities(String nom,String desc,int cd){
     _nom = nom;
     _desc = desc;
     _cd = cd;
