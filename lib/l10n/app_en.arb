@@ -16,5 +16,10 @@
     "warn" :"Warning !",
     "surequit" : "Are you sure you want to quit ?",
     "competence" : "Ability",
-    "title" : "Tutored Project S2"
+    "title" : "Tutored Project S2",
+    "readyTitle" : "Player readiness",
+        "ready" : "ready",
+        "notready" : "not ready",
+    "play" : "Play",
+    "errorTitle" : "An error occured"
 }

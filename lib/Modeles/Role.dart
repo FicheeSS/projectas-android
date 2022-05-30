@@ -7,7 +7,7 @@ abstract class Role{
 
     // créer une liste de taille fixe d'objet Competence
     // il y a deux objets dont les valeurs sont zero et devront etre changer plus tard
-    List<Abilities> flListCompetences = List<Abilities>.filled(1, Abilities ());
+    //List<Abilities> flListCompetences = List<Abilities>.filled(1, Abilities ());
 
     /// Constructeur Role
     Role(String id){
@@ -29,7 +29,7 @@ abstract class Role{
     set setId(String id){ _id=id; }
     set setScore(int score){ _score=score; }
     /// Mise à jour des compétences
-    set setCompetences(List<Abilities> c) { flListCompetences = c; }
+    //set setCompetences(List<Abilities> c) { flListCompetences = c; }
 
     // ----------------------------------------------------------------------------------
     // Functions --------------------------------------------------------------------------

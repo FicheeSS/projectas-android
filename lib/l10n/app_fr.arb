@@ -13,7 +13,13 @@
     "warn" :"Attention !",
     "surequit" : "Voulez-vous vraiment quitter ?",
     "competence" : "Compétence",
-    "title" : "Projet Tutoré S2"
+    "title" : "Projet Tutoré S2",
+    "readyTitle" : "U rdy ?",
+    "ready" : "pres",
+    "notready" : "pas pres",
+    "play" : "Jouer",
+    "errorTitle" : "OMG c'est une error"
+
 
 
 

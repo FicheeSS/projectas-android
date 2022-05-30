@@ -17,7 +17,7 @@ class WaitingView extends StatelessWidget {
       ),
       Padding(
         padding: EdgeInsets.only(top: 16),
-        child: Text('Waiting...', style: const TextStyle(fontSize: 15)),
+        child: Text('Waiting...', style: TextStyle(fontSize: 15)),
       )
     ];
     return Center(

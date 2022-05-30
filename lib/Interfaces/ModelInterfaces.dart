@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:geolocator/geolocator.dart';
 import 'package:testiut/Modeles/Abilities.dart';
 
 import 'package:flutter/cupertino.dart';
@@ -14,11 +15,11 @@ import 'dart:math' show cos, sqrt, asin;
 enum playerType { mouton, loup }
 
 class ModelInterfaces {
-  ModelInterfaces();
+   ModelInterfaces();
   // soit ajouter tableau avec toutes les parties et supprimer toutes les parties qu l'on n'a pas rejoins après avoir fais joingame()
 
   late String _idUtilisateur ;  // L'id qui est donc stocké dans le téléphone lié à Google
-  Partie? _currentGame;
+  late Partie? _currentGame;
 
   /// Constructeur Utilisateur
   /*ModelInterfaces(String idUtilisateur){
@@ -147,7 +148,7 @@ class ModelInterfaces {
   /// Return the abilities of the current player
   ///
   /// return [List<Abilities>]
-  Future<List?> getPlayerAbilities() async{
+  Future< List<Abilities>?> getPlayerAbilities() async{
     var url = Uri.parse("https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurJoueur&action=getLesCompetencesDebloques&idJoueur="
         + _idUtilisateur);
     final response = await http.get(url, headers:{
@@ -176,8 +177,8 @@ class ModelInterfaces {
   ///Get the player type = rôle
   ///
   /// return [playertype]
-  Future<playerType> getPlayerType(String id) async {
-    var url = Uri.parse("https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=XXXXXX&action=XXXXXXX&idPlayer="+ id);  // à compléter/reformuler lorsque la doc sera finie
+  Future<playerType> getPlayerType() async {
+    var url = Uri.parse("https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=XXXXXX&action=XXXXXXX&idPlayer="+ _idUtilisateur.toString());  // à compléter/reformuler lorsque la doc sera finie
     final response = await http.get(url, headers:{
       'Accept': 'application/json',
     });
@@ -205,8 +206,8 @@ class ModelInterfaces {
   ///
   /// return [LobbyPlayer[]]
 
-  List<LobbyPlayer> getAllPlayerInLobby(int partyId) async {
-    var url = Uri.parse("https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=XXXXXX&action=XXXXXXX&idPartie="+ id);  // à compléter/reformuler lorsque la doc sera finie
+  Future<List<LobbyPlayer>?> getAllPlayerInLobby(int partyId) async {
+    var url = Uri.parse("https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=XXXXXX&action=XXXXXXX&idPartie="+ partyId.toString());  // à compléter/reformuler lorsque la doc sera finie
     final response = await http.get(url, headers:{
       'Accept': 'application/json',
     });
@@ -215,7 +216,7 @@ class ModelInterfaces {
       var jsonString = jsonDecode(utf8.decode(response.bodyBytes)); // convertit le json en String
       Map<String, dynamic> map = jsonDecode(jsonString);
 
-
+      return null;
       // A FAIRE A completer une fois que le lobby sera plus clair
     }
     else
@@ -230,7 +231,7 @@ class ModelInterfaces {
   ///Get all the available parties
   ///
   /// return [PartyTime[]]
-  Future<List<PartyTime>> getAvailablesParties(GeoPoint PlayerLocation) async{  // a traduire en anglais peut etre ?
+  Future<List<PartyTime>> getAvailablesParties(Position PlayerLocation) async{  // a traduire en anglais peut etre ?
     var url = Uri.parse("https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=XXXXXX&action=XXXXXXX&idJoueur=" + _idUtilisateur);  // à compléter/reformuler lorsque la doc sera finie
     final response = await http.get(url, headers:{
       'Accept': 'application/json',
@@ -246,8 +247,8 @@ class ModelInterfaces {
       var jsonString = jsonDecode(utf8.decode(response.bodyBytes)); // convertit le json en String
       Map<String, dynamic> map = jsonDecode(jsonString);  // traduit le string json en map
       for (int i  = 0; i < map.length; i++) {
-        double distance = calculateDistance(map[i]["Zone"]["latitude"],map[i]["Zone"]["longitude"], map[i]["Zone"]["latitudeZone"], map[i]["Zone"]["longitudeZone"])
-        PartyTime pTime = PartyTime(map[i]["name"], distance, map[i]["nbPersonnes"], map[i]["uid"]); // A revoir l'ordre en fonction du json reçu
+        double distance = calculateDistance(map[i]["Zone"]["latitude"],map[i]["Zone"]["longitude"], map[i]["Zone"]["latitudeZone"], map[i]["Zone"]["longitudeZone"]);
+        PartyTime pTime = PartyTime(name : map[i]["name"], distance: distance, nbpersonnes: map[i]["nbPersonnes"], uid: map[i]["uid"]); // A revoir l'ordre en fonction du json reçu
         allAvailablesParties?.add(pTime);
       }
       return allAvailablesParties!;
@@ -296,7 +297,7 @@ class PartyTime {
   final int nbpersonnes;
   final int uid;
 
-  const PartyTime(map,
+  const PartyTime(
       {required this.name,
         required this.distance,
         required this.nbpersonnes,

@@ -26,10 +26,10 @@ class LobbyState extends State<Lobby> {
   bool areUReadyToDoThis = false;
 
   ///Update the table of the registered players
-  void updateTable() {
+  Future<void> updateTable() async {
 
     if(!mounted){return;}//make sure the widget exist before modifying it
-    currentParties = MI.getAllPlayerInLobby(partyId);
+    currentParties = (await MI.getAllPlayerInLobby(partyId))!;
     List<DataRow> res = [];
     bool rdy = true;
     for (var c in currentParties) {

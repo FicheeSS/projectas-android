@@ -12,6 +12,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:testiut/tools/PlayingArguments.dart';
 
+import '../Modeles/Abilities.dart';
 import '../main.dart';
 
 class MapView extends StatefulWidget {
@@ -62,12 +63,12 @@ class _MapViewState extends State<MapView> {
             size: 48,
           ),
         ),
-      );
+      ).catchError((error) =>{print("Catched error" + error.toString())});
     }
   }
   void updateMap() async {
     for (;;) {
-      var res = MI.getPlayersLocation();
+      var res = await MI.getPlayersLocation();
       for (var pos in res) {
         mapController.addMarker(
           pos.gp!,
@@ -90,18 +91,18 @@ class _MapViewState extends State<MapView> {
   /// return the abilities get with getPlayerAbilities to dispay on screen
   ///
   /// return List<ElevatedButton>
-  List<ElevatedButton> updateAbilities(BuildContext context){
-    List<Abilities> listesAbilite = MI.getPlayerAbilities();
+  Future<List<ElevatedButton>> updateAbilities(BuildContext context) async {
+    List<Abilities>? listesAbilite = await MI.getPlayerAbilities();
     List<ElevatedButton> temp = [];
-    for(int i=0;i<listesAbilite.length;i++){
+    for(int i=0;i<listesAbilite!.length;i++){
       temp.add(ElevatedButton(onPressed: ()=>{throw UnimplementedError()}, child: Text(listesAbilite[i].nom!)));
     }
     return temp;
   }
 
-  Widget createPlayerControls(BuildContext context){
+  Future<Widget> createPlayerControls(BuildContext context) async {
     //List<Abilities> listAbilities = MI.getPlayerAbilities();
-    if (MI.getPlayerType() == playerType.loup) {
+    if (await MI.getPlayerType() == playerType.loup) {
         return Row(
           children: [
             ElevatedButton(
@@ -113,16 +114,32 @@ class _MapViewState extends State<MapView> {
         );
     }
     else{
-      return Row(
-        children: updateAbilities(context),/*[
+      return  FutureBuilder<List<ElevatedButton>>(
+          future:  updateAbilities(context) ,
+          builder:(BuildContext context, AsyncSnapshot<List<ElevatedButton>> snapshot){
+            List<Widget> children;
+            if(snapshot.hasData){
+              children = snapshot.data!;
+            }else{
+              children = [Text("Waiting...")];
+            }
+            return Center(
+                child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: children,
+                )
+            );
+          }, /*[
           ElevatedButton(onPressed: () => {throw UnimplementedError()}, child: Text(AppLocalizations.of(context)!.competence))
           ,
         ],*/
       );
     }
   }
-  late MapController mapController;
   late Timer _timer;
+  final  MapController mapController =   MapController(
+    initMapWithUserPosition: true,
+  );
   @override
   Widget build(BuildContext context) {
 
@@ -131,9 +148,6 @@ class _MapViewState extends State<MapView> {
     if (kDebugMode) {
       print(uid);
     }
-    mapController =   MapController(
-      initMapWithUserPosition: true,
-    );
 
     _timer = Timer.periodic(const Duration(seconds: 5), (timer) =>{getPositionsFromRest(mapController) });
     return WillPopScope(
@@ -222,7 +236,17 @@ class _MapViewState extends State<MapView> {
                     width: (MediaQuery.of(context).size.width > 1000)
                         ? 1000
                         : MediaQuery.of(context).size.width,
-                    child: createPlayerControls(context),
+                    child: FutureBuilder<Widget>(
+                      future: createPlayerControls(context),
+                      builder: (BuildContext context, AsyncSnapshot<Widget> snapshot){
+                        Widget children;
+                        if(snapshot.hasData){
+                          return snapshot.data!;
+                        }else{
+                          return const Text("Waiting...");
+                        }
+                      }
+                    )
                   )
 
           ],
