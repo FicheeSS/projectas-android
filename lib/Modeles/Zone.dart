@@ -1,12 +1,16 @@
 
+import 'dart:ffi';
+
+import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
+
 class Zone{
 
-    String _center = "";
+    GeoPoint _center = GeoPoint(latitude: 0, longitude: 0);  // initialiser ?
     int _radius = 0;
 
     /// Constructeur Zone
-    Zone(String center, int radius){
-        _center=center;
+    Zone(double latitude, double longitude, int radius){
+        _center= new GeoPoint(longitude: longitude, latitude: latitude);
         _radius=radius;
     }
 
@@ -15,7 +19,7 @@ class Zone{
     // ----------------------------------------------------------------------------------
 
     ///
-    String get getCenter {
+    GeoPoint get getCenter {
         return _center;
     }
 
@@ -29,7 +33,7 @@ class Zone{
     // ----------------------------------------------------------------------------------
 
     ///
-    void set setCenter(String center){
+    void set setCenter(GeoPoint center){
         _center=center;
     }
 

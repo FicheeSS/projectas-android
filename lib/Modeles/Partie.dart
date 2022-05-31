@@ -8,7 +8,7 @@ class Partie{
     int _gameLength = 0;
     int _hideTime = 0;
     bool _isBeingPlayed = false;
-    Zone _zonePartie = new Zone("",0);
+    Zone _zonePartie = new Zone(0,0,0);
 
     /// Constructeur une fois que l'on reçoit l'id de la partie après l'envoi de la requête POST pour demander la création de la partie en base de donnée et récéption du JSON
     Partie(String id, int beginningTime, String name, int gameLength,int hideTime,Zone zonePartie){

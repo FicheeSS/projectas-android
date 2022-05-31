@@ -15,10 +15,11 @@ import 'dart:math' show cos, sqrt, asin;
 enum playerType { mouton, loup }
 
 class ModelInterfaces {
-   ModelInterfaces();
+  ModelInterfaces();
+
   // soit ajouter tableau avec toutes les parties et supprimer toutes les parties qu l'on n'a pas rejoins après avoir fais joingame()
 
-  late String _idUtilisateur ;  // L'id qui est donc stocké dans le téléphone lié à Google
+  late String _idUtilisateur; // L'id qui est donc stocké dans le téléphone lié à Google
   late Partie? _currentGame;
 
   /// Constructeur Utilisateur
@@ -28,13 +29,13 @@ class ModelInterfaces {
         _currentGame = null;
     }*/
 
-  void setIdUser(String idUser){
+  void setIdUser(String idUser) {
     _idUtilisateur = idUser;
   }
 
 
   ///Return the reason why we cannot connect to the api, null otherwise
-  Exception? tryConnectToApi(){
+  Exception? tryConnectToApi() {
     return null;
     //return TimeoutException("Cannot connect in time");
   }
@@ -43,34 +44,39 @@ class ModelInterfaces {
   ///
   /// Return if the player can participate
   /// Return is discarded if [isParticipating] is false
-  bool updatePlayerParticipation(bool isParticipating){
+  bool updatePlayerParticipation(bool isParticipating) {
     return true;
   }
 
 
-  Future<bool> joinGame (String idPartie) async {
+  Future<bool> joinGame(String idPartie) async {
     // joindre la partie
-    var url = Uri.parse("https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=XXXXX&idPartie=" +
-        idPartie + "&idJoueur=" + _idUtilisateur);  // Demande d'ajout au tableau joueurs de partie
-    final response = await http.get(url, headers:{
+    var url = Uri.parse(
+        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurJoueur&action=joinPartie&idJoueur=" +
+            _idUtilisateur + "&idPartie=" +
+            idPartie); // Demande d'ajout au tableau joueurs de partie
+    final response = await http.get(url, headers: {
       'Accept': 'application/json',
     });
-    if (response.statusCode == 200)
-    {
+    if (response.statusCode == 200) {
       //renvoie partie
-      var url = Uri.parse("https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=getPartieById-Partie&idPartie="
-          + idPartie);  // Demande d'ajout au tableau joueurs de partie
-      final response = await http.get(url, headers:{
+      var url = Uri.parse(
+          "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=getPartieByIdPartie&idPartie="
+              + idPartie); // Demande d'ajout au tableau joueurs de partie
+      final response = await http.get(url, headers: {
         'Accept': 'application/json',
       });
-      if (response.statusCode == 200)
-      {
-        var jsonString = jsonDecode(utf8.decode(response.bodyBytes)); // convertit le json en String
-        Map<String, dynamic> map = jsonDecode(jsonString);  // traduit le string json en map
-        var _currentGame =  Partie(map["id"], map["beginningTime"], map["name"], map["gameLength"], map["hideTime"], map["zoneGame"]);  // affecte à l'attribut _currentGame la partie à rejoindre
+      if (response.statusCode == 200) {
+        var jsonString = jsonDecode(
+            utf8.decode(response.bodyBytes)); // convertit le json en String
+        Map<String, dynamic> map = jsonDecode(
+            jsonString); // traduit le string json en map
+        var _currentGame = Partie(
+            map["id"], map["beginningTime"], map["name"], map["gameLength"],
+            map["hideTime"],
+            map["zoneGame"]); // affecte à l'attribut _currentGame la partie à rejoindre
       }
-      else
-      {
+      else {
         if (kDebugMode) {
           print(response.reasonPhrase);
           var messageM = jsonDecode(utf8.decode(response.bodyBytes));
@@ -79,8 +85,7 @@ class ModelInterfaces {
       }
       return true;
     }
-    else
-    {
+    else {
       if (kDebugMode) {
         print(response.reasonPhrase);
         var messageM = jsonDecode(utf8.decode(response.bodyBytes));
@@ -94,20 +99,21 @@ class ModelInterfaces {
   ///
   /// Use : [GeoPoint] the user location
   void updatePlayerLocation(GeoPoint gp) async {
-    var url = Uri.parse("https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=XXXXXX&action=XXXXXXX&idJoueur="
-        + _idUtilisateur + "&latitude="+ gp.latitude.toString()
-        + "&longitude=" + gp.longitude.toString());  // Mise à jour de la localisation du joueur dans la table participe
-    final response = await http.get(url, headers:{
+    var url = Uri.parse(
+        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=updatePlayerLocation&idJoueur="
+            + _idUtilisateur + "&idPartie=" + _currentGame!.getId +
+            "&latitudeJoueur=" + gp.latitude.toString()
+            + "&longitudeJoueur=" + gp.longitude
+            .toString()); // Mise à jour de la localisation du joueur dans la table participe
+    final response = await http.get(url, headers: {
       'Accept': 'application/json',
     });
-    if (response.statusCode == 200)
-    {
+    if (response.statusCode == 200) {
       if (kDebugMode) {
         print(response.statusCode);
       }
     }
-    else
-    {
+    else {
       if (kDebugMode) {
         print(response.reasonPhrase);
         var messageM = jsonDecode(utf8.decode(response.bodyBytes));
@@ -119,75 +125,95 @@ class ModelInterfaces {
   ///Return the all the player location as specified in [PlayerLocation]
   ///
   /// throws TBD
-  Future<List<PlayerLocation>> getPlayersLocation() async{
-    var url = Uri.parse("https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=XXXXXX&action=XXXXXXX");  // à compléter/reformuler lorsque la doc sera finie
-    final response = await http.get(url, headers:{
+  Future<List<PlayerLocation>> getPlayersLocation() async {
+    var url = Uri.parse(
+        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=getDonneesPartieJoueurs&idPartie=" +
+            _currentGame!
+                .getId); // à compléter/reformuler lorsque la doc sera finie
+    final response = await http.get(url, headers: {
       'Accept': 'application/json',
     });
-    if (response.statusCode == 200)  // json n éléments de 3 clés : l'id du joueur, longitude et latitude
+    if (response.statusCode ==
+        200) // json n éléments de 3 clés : l'id du joueur, longitude et latitude
         {
-      var jsonString = jsonDecode(utf8.decode(response.bodyBytes)); // convertit le json en String
-      Map<String, dynamic> map = jsonDecode(jsonString);  // traduit le string json en map
-      List<PlayerLocation> allPlayerLocation = List.filled(0,const PlayerLocation(icon: null, gp: null, idPlayer: null));
-      for (int j  = 0; j < map.length; j++) {
-        GeoPoint gp = GeoPoint( longitude: map[j]["longitude"], latitude: map[j]["latitude"]);
-        Icon? i ;
-        int idPlayer = map[j]["idPlayer"];  //  vérifier avec doc si le nom de la clé correspondant à idPlayer se nomme bien comme ça
-        allPlayerLocation.add(PlayerLocation(gp : gp,icon : i!, idPlayer: idPlayer));
+      var jsonString = jsonDecode(
+          utf8.decode(response.bodyBytes)); // convertit le json en String
+      Map<String, dynamic> map = jsonDecode(
+          jsonString); // traduit le string json en map
+      List<PlayerLocation> allPlayerLocation = List.filled(
+          0, const PlayerLocation(icon: null, gp: null, idPlayer: null));
+      for (int j = 0; j < map.length; j++) {
+        GeoPoint gp = GeoPoint(
+            longitude: map[j]["longitude"], latitude: map[j]["latitude"]);
+        Icon? i;
+        int idPlayer = map[j]["idPlayer"]; //  vérifier avec doc si le nom de la clé correspondant à idPlayer se nomme bien comme ça
+        allPlayerLocation.add(
+            PlayerLocation(gp: gp, icon: i!, idPlayer: idPlayer));
       }
       return allPlayerLocation;
     }
-    else
-    {
-      if(kDebugMode){
-        print("Erreur de retour API : code erreur = " + response.statusCode.toString() );
+    else {
+      if (kDebugMode) {
+        print("Erreur de retour API : code erreur = " +
+            response.statusCode.toString());
       }
-      throw Exception('code erreur : ' + response.statusCode.toString() );
-
+      throw Exception('code erreur : ' + response.statusCode.toString());
     }
   }
 
   /// Return the abilities of the current player
   ///
   /// return [List<Abilities>]
-  Future< List<Abilities>?> getPlayerAbilities() async{
-    var url = Uri.parse("https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurJoueur&action=getLesCompetencesDebloques&idJoueur="
-        + _idUtilisateur);
-    final response = await http.get(url, headers:{
+  Future<List<Abilities>?> getPlayerAbilities() async {
+    var url = Uri.parse(
+        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurJoueur&action=getLesCompetencesDebloques&idJoueur="
+            + _idUtilisateur);
+    final response = await http.get(url, headers: {
       'Accept': 'application/json',
     });
     List<Abilities>? allPlayerAbilities;
-    if (response.statusCode == 200)  // json n éléments de 3 clés : l'id du joueur, longitude et latitude
+    if (response.statusCode ==
+        200) // json n éléments de 3 clés : l'id du joueur, longitude et latitude
         {
-      var jsonString = jsonDecode(utf8.decode(response.bodyBytes)); // convertit le json en String
-      Map<String, dynamic> map = jsonDecode(jsonString);  // traduit le string json en map
-      for (int i  = 0; i < map.length; i++) {
-        Abilities abil = Abilities(map[i]["name"], map[i]["desc"], map[i]["cooldown"]); // A revoir l'ordre en fonction du json reçu
+      var jsonString = jsonDecode(
+          utf8.decode(response.bodyBytes)); // convertit le json en String
+      Map<String, dynamic> map = jsonDecode(
+          jsonString); // traduit le string json en map
+      for (int i = 0; i < map.length; i++) {
+        Abilities abil = Abilities(map[i]["name"], map[i]["desc"],
+            map[i]["cooldown"]); // A revoir l'ordre en fonction du json reçu
         allPlayerAbilities?.add(abil);
       }
       return allPlayerAbilities!;
     }
-    else
-    {
-      if(kDebugMode){
-        print("Erreur de retour API : code erreur = " + response.statusCode.toString() );
+    else {
+      if (kDebugMode) {
+        print("Erreur de retour API : code erreur = " +
+            response.statusCode.toString());
       }
-      throw Exception('code erreur : ' + response.statusCode.toString() );
+      throw Exception('code erreur : ' + response.statusCode.toString());
     }
   }
 
   ///Get the player type = rôle
   ///
   /// return [playertype]
+
   Future<playerType> getPlayerType() async {
-    var url = Uri.parse("https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=XXXXXX&action=XXXXXXX&idPlayer="+ _idUtilisateur.toString());  // à compléter/reformuler lorsque la doc sera finie
-    final response = await http.get(url, headers:{
+    var url = Uri.parse(
+        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=getPlayerType&idJoueur=" +
+            _idUtilisateur.toString() + "&idPartie=" + _currentGame!
+            .getId); // à compléter/reformuler lorsque la doc sera finie
+    final response = await http.get(url, headers: {
       'Accept': 'application/json',
     });
-    if (response.statusCode == 200)  // json n éléments de 3 clés : l'id du joueur, longitude et latitude
+    if (response.statusCode ==
+        200) // json n éléments de 3 clés : l'id du joueur, longitude et latitude
         {
-      var jsonString = jsonDecode(utf8.decode(response.bodyBytes)); // convertit le json en String
-      Map<String, dynamic> map = jsonDecode(jsonString);  // traduit le string json en map
+      var jsonString = jsonDecode(
+          utf8.decode(response.bodyBytes)); // convertit le json en String
+      Map<String, dynamic> map = jsonDecode(
+          jsonString); // traduit le string json en map
       if (map["role"] == "mouton") {
         return playerType.mouton;
       }
@@ -195,12 +221,12 @@ class ModelInterfaces {
         return playerType.loup;
       }
     }
-    else
-    {
-      if(kDebugMode){
-        print("Erreur de retour API : code erreur = " + response.statusCode.toString() );
+    else {
+      if (kDebugMode) {
+        print("Erreur de retour API : code erreur = " +
+            response.statusCode.toString());
       }
-      throw Exception('code erreur : ' + response.statusCode.toString() );
+      throw Exception('code erreur : ' + response.statusCode.toString());
     }
   }
 
@@ -208,70 +234,90 @@ class ModelInterfaces {
   ///
   /// return [LobbyPlayer[]]
 
-  Future<List<LobbyPlayer>?> getAllPlayerInLobby(int partyId) async {
-    var url = Uri.parse("https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=XXXXXX&action=XXXXXXX&idPartie="+ partyId.toString());  // à compléter/reformuler lorsque la doc sera finie
-    final response = await http.get(url, headers:{
+  Future<List<LobbyPlayer>> getAllPlayerInLobby(int partyId) async {
+    var url = Uri.parse(
+        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=getAllJoueurs&idPartie=" +
+            partyId
+                .toString()); // à compléter/reformuler lorsque la doc sera finie
+    final response = await http.get(url, headers: {
       'Accept': 'application/json',
     });
-    if (response.statusCode == 200)  // json n éléments de 3 clés : l'id du joueur, longitude et latitude
+    if (response.statusCode ==
+        200) // json n éléments de 3 clés : l'id du joueur, longitude et latitude
         {
-      var jsonString = jsonDecode(utf8.decode(response.bodyBytes)); // convertit le json en String
+      var jsonString = jsonDecode(
+          utf8.decode(response.bodyBytes)); // convertit le json en String
       Map<String, dynamic> map = jsonDecode(jsonString);
 
-      return null;
-      // A FAIRE A completer une fois que le lobby sera plus clair
+    List<LobbyPlayer>? allAvailablesPlayer;
+    for (int i = 0; i < map.length; i++) {
+    String name = map[i]["name"];
+    bool ready = map[i]["ready"];
+    LobbyPlayer lPlayer = LobbyPlayer(name : map[i]["name"], isReady : map[i]["ready"]); // A revoir l'ordre en fonction du json reçu
+    allAvailablesPlayer?.add(lPlayer);
+    }
+    return allAvailablesPlayer!;
+
+
+    // A FAIRE A completer une fois que le lobby sera plus clair
     }
     else
     {
-      if(kDebugMode){
-        print("Erreur de retour API : code erreur = " + response.statusCode.toString() );
-      }
-      throw Exception('code erreur : ' + response.statusCode.toString() );
+    if(kDebugMode){
+    print("Erreur de retour API : code erreur = " + response.statusCode.toString() );
+    }
+    throw Exception('code erreur : ' + response.statusCode.toString() );
     }
   }
 
   ///Get all the available parties
   ///
-  /// return [PartyTime[]]
-  Future<List<PartyTime>> getAvailablesParties(Position PlayerLocation) async{  // a traduire en anglais peut etre ?
-    var url = Uri.parse("https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=XXXXXX&action=XXXXXXX&idJoueur=" + _idUtilisateur);  // à compléter/reformuler lorsque la doc sera finie
+  /// return [PartyTime[]]<<
+
+
+  Future<List<PartyTime>> getAvailablesParties(Position PlayerLocation) async{
+    // a traduire en anglais peut etre ?
+    var url = Uri.parse(
+        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=getAllPartiesDisponible"); // à compléter/reformuler lorsque la doc sera finie
+
     final response = await http.get(url, headers:{
-      'Accept': 'application/json',
+    'Accept': 'application/json',
     });
     List<PartyTime>? allAvailablesParties;
-    if (response.statusCode == 200)  // json n éléments de 3 clés : l'id du joueur, longitude et latitude
+    if (response.statusCode == 200) // json n éléments de 3 clés : l'id du joueur, longitude et latitude
         {
-      /*  final String name;
+    /*  final String name;
                 final double distance;
                 final int nbpersonnes;
                 final int uid;
             */
-      var jsonString = jsonDecode(utf8.decode(response.bodyBytes)); // convertit le json en String
-      Map<String, dynamic> map = jsonDecode(jsonString);  // traduit le string json en map
-      for (int i  = 0; i < map.length; i++) {
-        double distance = calculateDistance(map[i]["Zone"]["latitude"],map[i]["Zone"]["longitude"], map[i]["Zone"]["latitudeZone"], map[i]["Zone"]["longitudeZone"]);
-        PartyTime pTime = PartyTime(name : map[i]["name"], distance: distance, nbpersonnes: map[i]["nbPersonnes"], uid: map[i]["uid"]); // A revoir l'ordre en fonction du json reçu
-        allAvailablesParties?.add(pTime);
-      }
-      return allAvailablesParties!;
+    var jsonString = jsonDecode(utf8.decode(response.bodyBytes)); // convertit le json en String
+    Map<String, dynamic> map = jsonDecode(jsonString); // traduit le string json en map
+    for (int i = 0; i < map.length; i++) {
+    double distance = calculateDistance(map[i]["Zone"]["latitude"],map[i]["Zone"]["longitude"], map[i]["Zone"]["latitudeZone"], map[i]["Zone"]["longitudeZone"]);
+    PartyTime pTime = PartyTime(name : map[i]["name"], distance: distance, nbpersonnes: map[i]["nbPersonnes"], uid: map[i]["uid"]); // A revoir l'ordre en fonction du json reçu
+
+    allAvailablesParties?.add(pTime);
+    }
+    return allAvailablesParties!;
     }
     else
     {
-      if(kDebugMode){
-        print("Erreur de retour API : code erreur = " + response.statusCode.toString() );
-      }
-      throw Exception('code erreur : ' + response.statusCode.toString() );
+    if(kDebugMode){
+    print("Erreur de retour API : code erreur = " + response.statusCode.toString() );
     }
-  }
+    throw Exception('code erreur : ' + response.statusCode.toString() );
+    }
+    }
 
-  double calculateDistance(lat1, lon1, lat2, lon2){
+    double calculateDistance(lat1, lon1, lat2, lon2){
     var p = 0.017453292519943295;
     var c = cos;
     var a = 0.5 - c((lat2 - lat1) * p)/2 +
-        c(lat1 * p) * c(lat2 * p) *
-            (1 - c((lon2 - lon1) * p))/2;
+    c(lat1 * p) * c(lat2 * p) *
+    (1 - c((lon2 - lon1) * p))/2;
     return 12742 * asin(sqrt(a));
-  }
+    }
 
 /*double calculateDistance(GeoPoint gPUser, GeoPoint gPPartie){
     var p = 0.017453292519943295;
@@ -283,32 +329,32 @@ class ModelInterfaces {
   }*/
 
 
-}
+  }
 
-class PlayerLocation {
+  class PlayerLocation {
   final GeoPoint? gp;
   final Icon? icon;
   final int? idPlayer;
 
   const PlayerLocation({required this.gp, required this.icon,required this.idPlayer});
-}
+  }
 
-class PartyTime {
+  class PartyTime {
   final String name;
   final double distance;
   final int nbpersonnes;
   final int uid;
 
   const PartyTime(
-      {required this.name,
-        required this.distance,
-        required this.nbpersonnes,
-        required this.uid});
-}
+  {required this.name,
+  required this.distance,
+  required this.nbpersonnes,
+  required this.uid});
+  }
 
-class LobbyPlayer{
+  class LobbyPlayer{
   final String name;
   final bool isReady;
 
   LobbyPlayer({required this.name, required this.isReady});
-}
+  }

@@ -7,7 +7,9 @@ abstract class Role{
 
     // créer une liste de taille fixe d'objet Competence
     // il y a deux objets dont les valeurs sont zero et devront etre changer plus tard
-    //List<Abilities> flListCompetences = List<Abilities>.filled(1, Abilities ());
+
+    List<Abilities> flListCompetences = List<Abilities>.filled(1, Abilities ("tuer","ça tue",2));
+
 
     /// Constructeur Role
     Role(String id){
