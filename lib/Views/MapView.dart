@@ -13,6 +13,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:testiut/tools/PlayingArguments.dart';
 
+import '../Modeles/Abilities.dart';
 import '../main.dart';
 
 class MapView extends StatefulWidget {
@@ -63,12 +64,12 @@ class _MapViewState extends State<MapView> {
             size: 48,
           ),
         ),
-      );
+      ).catchError((error) =>{print("Catched error" + error.toString())});
     }
   }
   void updateMap() async {
     for (;;) {
-      var res = MI.getPlayersLocation();
+      var res = await MI.getPlayersLocation();
       for (var pos in res) {
         mapController.addMarker(
           pos.gp!,
@@ -91,8 +92,8 @@ class _MapViewState extends State<MapView> {
   /// return the abilities get with getPlayerAbilities to dispay on screen
   ///
   /// return List<ElevatedButton>
-  List<ElevatedButton> updateAbilities(BuildContext context){
-    List<Abilities> listesAbilite = MI.getPlayerAbilities();
+  Future<List<ElevatedButton>> updateAbilities(BuildContext context) async {
+    List<Abilities>? listesAbilite = await MI.getPlayerAbilities();
     List<ElevatedButton> temp = [];
     for(int i=0;i<listesAbilite.length;i++){
       temp.add(ElevatedButton(onPressed: ()=>{}, child: Text(listesAbilite[i].nom!)));
@@ -190,6 +191,9 @@ class _MapViewState extends State<MapView> {
   int count=0;
   late MapController mapController;
   late Timer _timer;
+  final  MapController mapController =   MapController(
+    initMapWithUserPosition: true,
+  );
   @override
   Widget build(BuildContext context) {
 
@@ -198,9 +202,6 @@ class _MapViewState extends State<MapView> {
     if (kDebugMode) {
       print(uid);
     }
-    mapController =   MapController(
-      initMapWithUserPosition: true,
-    );
 
     //partie comenté pr tester le timer
     _timer = Timer.periodic(const Duration(seconds: 5), (timer) =>{/*getPositionsFromRest(mapController)*/print("Bonsoir")/*, if(count++>2&&!isKillEnable){setState(()=>{count=0, isKillEnable=true}) }*/});
@@ -287,7 +288,17 @@ class _MapViewState extends State<MapView> {
                     width: (MediaQuery.of(context).size.width > 1000)
                         ? 1000
                         : MediaQuery.of(context).size.width,
-                    child: createPlayerControls(context),
+                    child: FutureBuilder<Widget>(
+                      future: createPlayerControls(context),
+                      builder: (BuildContext context, AsyncSnapshot<Widget> snapshot){
+                        Widget children;
+                        if(snapshot.hasData){
+                          return snapshot.data!;
+                        }else{
+                          return const Text("Waiting...");
+                        }
+                      }
+                    )
                   )
 
           ],

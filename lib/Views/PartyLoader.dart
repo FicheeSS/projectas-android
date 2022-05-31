@@ -1,11 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:testiut/Interfaces/ModelInterfaces.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:testiut/tools/PlayingArguments.dart';
 import '../main.dart';
+import 'package:geolocator/geolocator.dart';
 
 class PartyLoader extends StatefulWidget {
   late List<PartyTime> currentParties;
@@ -14,8 +16,8 @@ class PartyLoader extends StatefulWidget {
     Navigator.pushNamed(context, '/playing',arguments: PlayingArgument(uid));
   }
 
-  List<DataRow> updateTable(BuildContext context) {
-    currentParties = MI.getAvailablesParties();
+  Future<List<DataRow>> updateTable(BuildContext context) async{
+    currentParties = await MI.getAvailablesParties(await Geolocator.getCurrentPosition());
     List<DataRow> res = [];
     for (var c in currentParties) {
       res.add(DataRow(cells: [
@@ -50,14 +52,22 @@ class _PartyLoaderState extends State<PartyLoader> {
               },
             ),),
             body: Center(
-      child: DataTable(
-          showCheckboxColumn: false,
-          columns: <DataColumn>[
-            DataColumn(label: Text(AppLocalizations.of(context)!.name)),
-            DataColumn(label: Text(AppLocalizations.of(context)!.nbplayers)),
-            DataColumn(label: Text(AppLocalizations.of(context)!.distance))
-          ],
-          rows: widget.updateTable(context)),
+      child: FutureBuilder<List<DataRow>>(
+        future:  widget.updateTable(context),
+        builder: (BuildContext context, AsyncSnapshot<List<DataRow>> snapshot){
+          if(!snapshot.hasData){
+            return const Text("Waiting...");
+          }
+          return DataTable(
+              showCheckboxColumn: false,
+              columns: <DataColumn>[
+                DataColumn(label: Text(AppLocalizations.of(context)!.name)),
+                DataColumn(label: Text(AppLocalizations.of(context)!.nbplayers)),
+                DataColumn(label: Text(AppLocalizations.of(context)!.distance))
+              ],
+              rows:snapshot.data!);
+        },
+      ),
     )));
   }
 }

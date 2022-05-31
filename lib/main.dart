@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:testiut/Interfaces/ModelInterfaces.dart';
 import 'package:testiut/Views/MapView.dart';
 import 'package:testiut/Views/PartyLoader.dart';
@@ -14,39 +15,35 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:testiut/tools/RandomGarbage.dart';
 import 'firebase_options.dart';
 import 'Views/SignIn.dart';
 import 'package:http/http.dart' as http;
+import 'package:geolocator/geolocator.dart';
 
-
-const ModelInterfaces MI = ModelInterfaces();
+ModelInterfaces MI = ModelInterfaces();
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final GoogleSignIn _googleSignIn = GoogleSignIn();
+late LocationPermission permission;
 
-
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp
-  ]);
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-
   @override
   Widget build(BuildContext context) {
-
     return MaterialApp(
       title: 'Project Tutoré S2',
-      routes: {
-        '/playing' : (context) =>  MapView()
-      },
+      routes: {'/playing': (context) => MapView()},
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -60,7 +57,7 @@ class MyApp extends StatelessWidget {
       ],
       home: Scaffold(
         appBar: AppBar(
-          title:  Text("Project Tutoré S2"),
+          title: Text("Project Tutoré S2"),
         ),
         body: const Center(
           child: MyStatefulWidget(),
@@ -83,21 +80,18 @@ class MyStatefulWidget extends StatefulWidget {
 
   @override
   State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
-
 }
 
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   currentState _cs = currentState.none;
   var ls = LoginScreen();
   var _name = "name";
-  late AndroidDeviceInfo androidInfo ;
+  late AndroidDeviceInfo androidInfo;
   @override
   void initState() {
     super.initState();
     waitforStartup();
-
   }
-
 
   callback(currentState cs) {
     setState(() {
@@ -124,93 +118,117 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         break;
     }
   }
-  final ButtonStyle style =
-  ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
 
-  void  waitforStartup() async{
-    await     ls.signInWithGoogle().then((value) => {
-      setState(()=> {
-        _name = ls.user!.displayName!
-      })
-    }).catchError((error) => {print(error)});
+  final ButtonStyle style =
+      ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
+  Exception? initialisationError;
+
+  void waitforStartup() async {
+    await ls
+        .signInWithGoogle()
+        .then((value) => {
+              setState(() => {_name = ls.user!.displayName!,MI.setIdUser(ls.user!.uid)})
+            })
+        .catchError((error) => {print(error)});
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     androidInfo = await deviceInfo.androidInfo;
+    if (!await Geolocator.isLocationServiceEnabled()) {
+      initialisationError = Exception("La localisation doit être active pour le fonctionnement de l'application");
+    }
+      permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          initialisationError = Exception(
+              "La location est nécessaire au fonction de l'application");
+        }
+      } else if (permission == LocationPermission.deniedForever) {
+        initialisationError = Exception(
+            "La location est nécessaire au fonction de l'application");
 
+    }
   }
+
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Text(
-            'Bienvenue ' +  _name ,
-            style: TextStyle(fontSize: 30),
-          ),
-          const SizedBox(height: 30),
-          ElevatedButton(
-
-            child: Row(
+    return initialisationError == null
+        ? Center(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
-              children:[
-                Icon(Icons.play_arrow),
-                SizedBox(width: 5),
-                Text('Jouer'),
-
+              children: <Widget>[
+                Text(
+                  'Bienvenue ' + _name,
+                  style: TextStyle(fontSize: 30),
+                ),
+                const SizedBox(height: 30),
+                ElevatedButton(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.play_arrow),
+                      SizedBox(width: 5),
+                      Text('Jouer'),
+                    ],
+                  ),
+                  style: style,
+                  onPressed: _name == "name"
+                      ? null
+                      : () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => PartyLoader()),
+                          );
+                        },
+                ),
+                const SizedBox(height: 30),
+                ElevatedButton(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.person),
+                      SizedBox(width: 5),
+                      Text('Profile'),
+                    ],
+                  ),
+                  style: style,
+                  onPressed: () => showDialog<String>(
+                      context: context,
+                      builder: (BuildContext context) => AlertDialog(
+                            title:
+                                Text(AppLocalizations.of(context)!.userProfile),
+                            content: Text(androidInfo.androidId!),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.pop(context, 'Cancel'),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, 'OK'),
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          )),
+                ),
+                const SizedBox(height: 30),
+                ElevatedButton(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(Icons.exit_to_app),
+                      SizedBox(width: 5),
+                      Text('Quitter'),
+                    ],
+                  ),
+                  style: style,
+                  onPressed: () {
+                    SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+                  }, //suicide
+                ), //LoginScreen()
               ],
-
             ),
-            style: style,
-            onPressed: _name == "name" ? null : () {
-              Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) =>  PartyLoader(
-            )),
-          ); },
-          ),
-          const SizedBox(height: 30),
-          ElevatedButton(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children:[
-                Icon(Icons.person),
-                SizedBox(width: 5),
-                Text('Profile'),
-              ],
-            ),
-            style: style,
-            onPressed: () =>showDialog<String>(
-                context: context,
-                builder: (BuildContext context) => AlertDialog(
-                  title:  Text(AppLocalizations.of(context)!.userProfile),
-                  content: Text(androidInfo.androidId!),
-                  actions: <Widget>[
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, 'Cancel'),
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, 'OK'),
-                      child: const Text('OK'),
-                    ),
-                  ],
-                )),
-          ),
-          const SizedBox(height: 30),
-          ElevatedButton(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children:const [
-                Icon(Icons.exit_to_app),
-                SizedBox(width: 5),
-                Text('Quitter'),
-              ],
-            ),
-            style: style,
-            onPressed: () {SystemChannels.platform.invokeMethod('SystemNavigator.pop');},//suicide
-          ), //LoginScreen()
-        ],
-      ),
-    );
+          )
+        : ShowErrorDialog(e: initialisationError!);
   }
 }
