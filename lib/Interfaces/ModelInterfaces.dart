@@ -102,7 +102,9 @@ class ModelInterfaces {
     });
     if (response.statusCode == 200)
     {
-      print(response.statusCode);
+      if (kDebugMode) {
+        print(response.statusCode);
+      }
     }
     else
     {
