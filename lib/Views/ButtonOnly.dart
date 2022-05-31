@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:testiut/Interfaces/ModelInterfaces.dart';
 import 'package:testiut/main.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ButtonOnly extends StatefulWidget {
   const ButtonOnly({Key? key}) : super(key: key);
@@ -30,62 +31,43 @@ class _ButtonOnlyState extends State<ButtonOnly> {
     return temp;
   }
 
+  //bool pr le btn et timer pour le CD du btn kill
   bool isKillEnable = true;
-  //final RestartableTimer _timerKill = RestartableTimer(const Duration(seconds: 2),handleTimeOut);
   late Timer _timerKill;
 
+  //fct appelé quand le bouton est pressé
   void fctCallBack() {
-    /*setState(() {
-        //_timerKill.reset();
-        //_timerKill = Timer(const Duration(seconds: 5),handleTimeOut);
-        //isKillEnable=false;
-      });*/
+    //on change le bool pour disable le btn
     setState(() {
       isKillEnable=false;
     });
-
+    //on lance le timer pour 5 sec (durée du CD)
     _timerKill = Timer(const Duration(seconds: 5), handleTimeOut);
-    print("timerKill debut");
   }
 
+  //fct appelé quand le timer se finit apres sa const Duration()
   void handleTimeOut() {
-    /*setState(() {
-      //isKillEnable=true;
-      //_timerKill.cancel();
-    });*/
+    //on stop le timer pour pas qu'il continue dans le vide
     _timerKill.cancel();
+    //on rechange le bool pour que le btn se réactive apres le CD
     setState(() {
       isKillEnable = true;
     });
-
-    print("timerKill fin");
   }
 
-  /*void fctCallBackTemp(){
-    _timerKill = Timer(const Duration(seconds: 5), () =>
-    {
-      setState(() => {isKillEnable = true, _timerKill.cancel()})
-    });
-    setState(() => {isKillEnable = false});
-
-    /*setState(() {
-      isKillEnable=true;
-      _timerKill.cancel();
-    });*/
-  }*/
-
   Future<Widget> createPlayerControls(BuildContext context) async {
-    //Timer timer = Timer(const Duration(seconds: 5), () =>{setState(()=>{isKillEnable=true})});
+    //on crée le btnKill avant pour pouvoir l'ajouter dans la liste des abilités
     ElevatedButton btnKill = ElevatedButton(
         style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all<Color>(Colors.red)),
         onPressed:
-        isKillEnable ? () => {fctCallBack(), isKillEnable = false} : null,
-        child: Text("kill"));
+        isKillEnable ? fctCallBack : null, // si le bool est vrai on lance la fctCallBack sinon le btn est disable (null)
+        child: Text(AppLocalizations.of(context)!.kill));
 
     List<ElevatedButton> listeBtn = [];
+    //le btn kill est ajouté en 1er pour qu'il soit en haut de la liste
     listeBtn.add(btnKill);
-    var listeTemp = await updateAbilities(context);
+    var listeTemp = await updateAbilities(context); // le reste des abilité est donné par l'API
     for (var i = 0; i < listeTemp.length; i++) {
       listeBtn.add(listeTemp[i]);
     }
@@ -93,27 +75,16 @@ class _ButtonOnlyState extends State<ButtonOnly> {
       return Center(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: listeBtn,
+            children: listeBtn, // si c'est un loup on met la liste avec le Kill
           ));
     } else {
       return Center(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: listeTemp,
+            children: listeTemp, // sinon la liste sans le kill
           ));
     }
   }
-
-  //fct callback du timer
-  /*void fctCB(){
-    getPositionsFromRest(mapController);
-    if(count++>2&&!isKillEnable){
-      setState(() {
-        count=0;
-        isKillEnable=true;
-      });
-    }
-  }*/
 
   int count = 0;
   @override
@@ -131,5 +102,4 @@ class _ButtonOnlyState extends State<ButtonOnly> {
           }
         });
   }
-
 }
