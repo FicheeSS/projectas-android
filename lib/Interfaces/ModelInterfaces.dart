@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:testiut/Modeles/Abilities.dart';
 
@@ -21,6 +22,17 @@ class ModelInterfaces {
 
   late String _idUtilisateur; // L'id qui est donc stocké dans le téléphone lié à Google
   late Partie? _currentGame;
+
+  Future<String> getUserName(String uid) async{
+    String bearer = uid;
+    String token = "Bearer $bearer";
+    var apiUrl = Uri.parse('https://www.googleapis.com/oauth2/v2/userinfo');
+    final response = await http.get(apiUrl, headers: {
+      'Authorization' : token
+    });
+    final responseJson = jsonDecode(response.body);
+    return responseJson["name"];
+  }
 
   /// Constructeur Utilisateur
   /*ModelInterfaces(String idUtilisateur){
