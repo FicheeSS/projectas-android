@@ -43,6 +43,10 @@ class _ButtonOnlyState extends State<ButtonOnly> {
     });
     //on lance le timer pour 5 sec (durée du CD)
     _timerKill = Timer(const Duration(seconds: 5), handleTimeOut);
+
+    //TODO
+    // fonction que tue les autres players
+
   }
 
   //fct appelé quand le timer se finit apres sa const Duration()
