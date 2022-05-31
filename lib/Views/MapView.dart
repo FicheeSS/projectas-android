@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:async/async.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -98,28 +99,68 @@ class _MapViewState extends State<MapView> {
     }
     return temp;
   }
+
   bool isKillEnable = true;
+  //final RestartableTimer _timerKill = RestartableTimer(const Duration(seconds: 2),handleTimeOut);
   late Timer _timerKill;
 
   void fctCallBack(){
+    /*setState(() {
+        //_timerKill.reset();
+        //_timerKill = Timer(const Duration(seconds: 5),handleTimeOut);
+        //isKillEnable=false;
+      });*/
+    /*setState(() {
+      isKillEnable=false;
+    });*/
+
+    _timerKill = Timer(const Duration(seconds: 5),handleTimeOut);
+    print("timerKill debut");
+  }
+
+  void handleTimeOut(){
+    /*setState(() {
+      //isKillEnable=true;
+      //_timerKill.cancel();
+    });*/
+    _timerKill.cancel();
+    setState(() {
+      isKillEnable=true;
+    });
+
+    print("timerKill fin");
+  }
+
+  /*void fctCallBackTemp(){
     _timerKill = Timer(const Duration(seconds: 5), () =>
     {
       setState(() => {isKillEnable = true, _timerKill.cancel()})
     });
     setState(() => {isKillEnable = false});
-  }
+
+    /*setState(() {
+      isKillEnable=true;
+      _timerKill.cancel();
+    });*/
+  }*/
+
+
 
   Widget createPlayerControls(BuildContext context){
     //Timer timer = Timer(const Duration(seconds: 5), () =>{setState(()=>{isKillEnable=true})});
     ElevatedButton btnKill = ElevatedButton(
         style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(Colors.red)),
-        onPressed: isKillEnable ? ()=> {setState(()=>{isKillEnable=false})}: null,
+        onPressed: isKillEnable ? ()=> {fctCallBack(),isKillEnable=false}: null,
         child: Text(AppLocalizations.of(context)!.kill)
     );
-    //List<Abilities> listAbilities = MI.getPlayerAbilities();
-    var listeBtn = updateAbilities(context);
+
+    List<ElevatedButton> listeBtn = [];
+    listeBtn.add(btnKill);
+    var listeTemp = updateAbilities(context);
+    for(var i=0;i<listeTemp.length;i++){
+      listeBtn.add(listeTemp[i]);
+    }
     if (MI.getPlayerType() == playerType.loup) {
-      listeBtn.add(btnKill);
         return Center(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -130,16 +171,13 @@ class _MapViewState extends State<MapView> {
       return Center(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: updateAbilities(context),/*[
-          ElevatedButton(onPressed: () => {throw UnimplementedError()}, child: Text(AppLocalizations.of(context)!.competence))
-          ,
-        ],*/
+        children: updateAbilities(context),
       ));
     }
   }
-  
+
   //fct callback du timer
-  void fctCB(){
+  /*void fctCB(){
     getPositionsFromRest(mapController);
     if(count++>2&&!isKillEnable){
       setState(() {
@@ -147,8 +185,8 @@ class _MapViewState extends State<MapView> {
         isKillEnable=true;
       });
     }
-  }
-  
+  }*/
+
   int count=0;
   late MapController mapController;
   late Timer _timer;
@@ -163,7 +201,9 @@ class _MapViewState extends State<MapView> {
     mapController =   MapController(
       initMapWithUserPosition: true,
     );
-    _timer = Timer.periodic(const Duration(seconds: 5), (timer) =>{getPositionsFromRest(mapController), if(count++>2&&!isKillEnable){setState(()=>{count=0, isKillEnable=true}) }});
+
+    //partie comenté pr tester le timer
+    _timer = Timer.periodic(const Duration(seconds: 5), (timer) =>{/*getPositionsFromRest(mapController)*/print("Bonsoir")/*, if(count++>2&&!isKillEnable){setState(()=>{count=0, isKillEnable=true}) }*/});
     return WillPopScope(
       onWillPop: () async {
         return false;
@@ -208,9 +248,6 @@ class _MapViewState extends State<MapView> {
                       minZoomLevel: 17,
                       maxZoomLevel: 19,
                       stepZoom: 1.0,
-                      onLocationChanged: (gp) async {
-                        mapController.changeLocation(await mapController.myLocation());
-                      },
                       androidHotReloadSupport: true,
                       userLocationMarker: UserLocationMaker(
                         personMarker: const MarkerIcon(
@@ -261,6 +298,7 @@ class _MapViewState extends State<MapView> {
   @override
   void dispose(){
     _timer.cancel();
+    mapController.dispose();
     super.dispose();
   }
 }
