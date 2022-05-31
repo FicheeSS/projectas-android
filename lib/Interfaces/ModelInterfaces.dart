@@ -60,7 +60,7 @@ class ModelInterfaces {
     //TODO : Implement getPlayerType
     if (kDebugMode) {
       //A supprimer quand l'implémentation sera prète
-      return playerType.mouton;
+      return playerType.loup;
     }
     throw UnimplementedError();
   }
