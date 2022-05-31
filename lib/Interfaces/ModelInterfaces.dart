@@ -294,7 +294,7 @@ class ModelInterfaces {
     var jsonString = jsonDecode(utf8.decode(response.bodyBytes)); // convertit le json en String
     Map<String, dynamic> map = jsonDecode(jsonString); // traduit le string json en map
     for (int i = 0; i < map.length; i++) {
-    double distance = calculateDistance(map[i]["Zone"]["latitude"],map[i]["Zone"]["longitude"], map[i]["Zone"]["latitudeZone"], map[i]["Zone"]["longitudeZone"]);
+    double distance = await calculateDistance(map[i]["Zone"]["latitude"],map[i]["Zone"]["longitude"], map[i]["Zone"]["latitudeZone"], map[i]["Zone"]["longitudeZone"]);
     PartyTime pTime = PartyTime(name : map[i]["name"], distance: distance, nbpersonnes: map[i]["nbPersonnes"], uid: map[i]["uid"]); // A revoir l'ordre en fonction du json reçu
 
     allAvailablesParties?.add(pTime);
@@ -310,13 +310,11 @@ class ModelInterfaces {
     }
     }
 
-    double calculateDistance(lat1, lon1, lat2, lon2){
-    var p = 0.017453292519943295;
-    var c = cos;
-    var a = 0.5 - c((lat2 - lat1) * p)/2 +
-    c(lat1 * p) * c(lat2 * p) *
-    (1 - c((lon2 - lon1) * p))/2;
-    return 12742 * asin(sqrt(a));
+    Future<double> calculateDistance(double lat1, double lon1, double lat2, double lon2) async {
+
+    return  await distance2point(GeoPoint(longitude: lon1,latitude: lat1,),
+      GeoPoint( longitude: lon2, latitude: lat2, ),);
+
     }
 
 /*double calculateDistance(GeoPoint gPUser, GeoPoint gPPartie){
