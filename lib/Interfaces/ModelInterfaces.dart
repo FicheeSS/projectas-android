@@ -1,17 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:testiut/Modeles/Abilities.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
-import 'package:testiut/Modeles/Partie.dart';
-import 'package:testiut/main.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
-import 'dart:math' show cos, sqrt, asin;
-
+import 'package:testiut/Modeles/Abilities.dart';
+import 'package:testiut/Modeles/Partie.dart';
+import 'package:testiut/Modeles/Zone.dart';
+import 'package:testiut/main.dart';
 
 enum playerType { mouton, loup }
 
@@ -20,17 +18,20 @@ class ModelInterfaces {
 
   // soit ajouter tableau avec toutes les parties et supprimer toutes les parties qu l'on n'a pas rejoins après avoir fais joingame()
 
-  late String _idUtilisateur; // L'id qui est donc stocké dans le téléphone lié à Google
+  late String
+      _idUtilisateur; // L'id qui est donc stocké dans le téléphone lié à Google
   late Partie? _currentGame;
 
-  Future<String> getUserName(String uid) async{
+  Future<String> getUserName(String uid) async {
     String bearer = uid;
     String token = "Bearer $bearer";
     var apiUrl = Uri.parse('https://www.googleapis.com/oauth2/v2/userinfo');
-    final response = await http.get(apiUrl, headers: {
-      'Authorization' : token
-    });
+    final response = await http.get(apiUrl, headers: {'Authorization': token});
+    if (response.statusCode != 200) {
+      return "nom";
+    }
     final responseJson = jsonDecode(response.body);
+
     return responseJson["name"];
   }
 
@@ -41,10 +42,37 @@ class ModelInterfaces {
         _currentGame = null;
     }*/
 
+  Future<bool> isUserExist() async {
+    var url = Uri.parse(
+        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurJoueur&action=getJoueurById&idJoueur=" +
+            _idUtilisateur);
+    final response = await http.get(url, headers: {
+      'Accept': 'application/json',
+    });
+    return response.statusCode == 200;
+  }
+
+  Future<void> addUser() async {
+    var url = Uri.parse(
+        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurJoueur&action=insertJoueur&idGoogle=" +
+            _idUtilisateur +
+            "&nom=" +
+            googleSignIn!.currentUser!.displayName!);
+    final response = await http.get(url, headers: {
+      'Accept': 'application/json',
+    });
+    if (response.statusCode != 200) {
+      if (kDebugMode) {
+        print(response.reasonPhrase);
+        var messageM = jsonDecode(utf8.decode(response.bodyBytes));
+        print(messageM);
+      }
+    }
+  }
+
   void setIdUser(String idUser) {
     _idUtilisateur = idUser;
   }
-
 
   ///Return the reason why we cannot connect to the api, null otherwise
   Exception? tryConnectToApi() {
@@ -52,7 +80,7 @@ class ModelInterfaces {
     //return TimeoutException("Cannot connect in time");
   }
 
-  ///Notify the api that the player is participating or not depenting on the  bool
+  ///Notify the api that the player is participating or not depending on the  bool
   ///
   /// Return if the player can participate
   /// Return is discarded if [isParticipating] is false
@@ -60,44 +88,68 @@ class ModelInterfaces {
     return true;
   }
 
-
   Future<bool> joinGame(String idPartie) async {
     // joindre la partie
     var url = Uri.parse(
         "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurJoueur&action=joinPartie&idJoueur=" +
-            _idUtilisateur + "&idPartie=" +
+            _idUtilisateur +
+            "&idPartie=" +
             idPartie); // Demande d'ajout au tableau joueurs de partie
     final response = await http.get(url, headers: {
       'Accept': 'application/json',
     });
     if (response.statusCode == 200) {
       //renvoie partie
-      var url = Uri.parse(
-          "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=getPartieByIdPartie&idPartie="
-              + idPartie); // Demande d'ajout au tableau joueurs de partie
-      final response = await http.get(url, headers: {
+      var url2 = Uri.parse(
+          "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=getPartieByIdPartie&idPartie=" +
+              idPartie); // Demande d'ajout au tableau joueurs de partie
+      final response2 = await http.get(url2, headers: {
         'Accept': 'application/json',
       });
-      if (response.statusCode == 200) {
+      if (response2.statusCode == 200) {
         var jsonString = jsonDecode(
-            utf8.decode(response.bodyBytes)); // convertit le json en String
-        Map<String, dynamic> map = jsonDecode(
-            jsonString); // traduit le string json en map
-        var _currentGame = Partie(
-            map["id"], map["beginningTime"], map["name"], map["gameLength"],
-            map["hideTime"],
-            map["zoneGame"]); // affecte à l'attribut _currentGame la partie à rejoindre
-      }
-      else {
+            utf8.decode(response2.bodyBytes)); // convertit le json en String
+        Map<String, dynamic> map =
+            jsonDecode(jsonString); // traduit le string json en map
+
+        // appel pour récupérer le nom de la zone = nom de la partie
+        var url3 = Uri.parse(
+            "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurZone&action=getZoneById&idZone=" +
+                map["idZone"]); // Demande d'ajout au tableau joueurs de partie
+        final response3 = await http.get(url3, headers: {
+          'Accept': 'application/json',
+        });
+        if (response3.statusCode == 200) {
+          var jsonString = jsonDecode(utf8.decode(response3.bodyBytes));
+          Map<String, dynamic> map2 = jsonDecode(jsonString);
+          var nomDeZone = map2["nomZone"];
+          int radius = map2["rayonZone"];
+          double latitude = map2["latitudeZone"];
+          double longitude = map2["longitudeZone"];
+          Zone zone = Zone(latitude, longitude, radius);
+          var _currentGame = Partie(
+              id: map["idPartie"],
+              beginningTime: map["datePartie"],
+              name: nomDeZone,
+              gameLength: map["tempsLimite"],
+              zonePartie:
+                  zone); // affecte à l'attribut _currentGame la partie à rejoindre
+        } else {
+          if (kDebugMode) {
+            print(response3.reasonPhrase);
+            var messageM = jsonDecode(utf8.decode(response3.bodyBytes));
+            print(messageM);
+          }
+        }
+      } else {
         if (kDebugMode) {
-          print(response.reasonPhrase);
-          var messageM = jsonDecode(utf8.decode(response.bodyBytes));
+          print(response2.reasonPhrase);
+          var messageM = jsonDecode(utf8.decode(response2.bodyBytes));
           print(messageM);
         }
       }
       return true;
-    }
-    else {
+    } else {
       if (kDebugMode) {
         print(response.reasonPhrase);
         var messageM = jsonDecode(utf8.decode(response.bodyBytes));
@@ -110,22 +162,24 @@ class ModelInterfaces {
   ///Update the user with the provided position
   ///
   /// Use : [GeoPoint] the user location
+  // Requête qui marche : https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=updatePlayerLocation&idJoueur=2&idPartie=1&latitudeJoueur=420.3&longitudeJoueur=360.3
   void updatePlayerLocation(GeoPoint gp) async {
     var url = Uri.parse(
-        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=updatePlayerLocation&idJoueur="
-            + _idUtilisateur + "&idPartie=" + _currentGame!.getId +
-            "&latitudeJoueur=" + gp.latitude.toString()
-            + "&longitudeJoueur=" + gp.longitude
-            .toString()); // Mise à jour de la localisation du joueur dans la table participe
+        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=updatePlayerLocation&idJoueur=" +
+            _idUtilisateur +
+            "&idPartie=" +
+            _currentGame!.getId +
+            "&latitudeJoueur=" +
+            gp.latitude.toString() +
+            "&longitudeJoueur=" +
+            gp.longitude
+                .toString()); // Mise à jour de la localisation du joueur dans la table participe
     final response = await http.get(url, headers: {
       'Accept': 'application/json',
     });
     if (response.statusCode == 200) {
-      if (kDebugMode) {
-        print(response.statusCode);
-      }
-    }
-    else {
+      print(response.statusCode);
+    } else {
       if (kDebugMode) {
         print(response.reasonPhrase);
         var messageM = jsonDecode(utf8.decode(response.bodyBytes));
@@ -140,31 +194,28 @@ class ModelInterfaces {
   Future<List<PlayerLocation>> getPlayersLocation() async {
     var url = Uri.parse(
         "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=getDonneesPartieJoueurs&idPartie=" +
-            _currentGame!
-                .getId); // à compléter/reformuler lorsque la doc sera finie
+            _currentGame!.getId);
     final response = await http.get(url, headers: {
       'Accept': 'application/json',
     });
     if (response.statusCode ==
         200) // json n éléments de 3 clés : l'id du joueur, longitude et latitude
-        {
-      var jsonString = jsonDecode(
-          utf8.decode(response.bodyBytes)); // convertit le json en String
-      Map<String, dynamic> map = jsonDecode(
-          jsonString); // traduit le string json en map
+    {
+      var jsonString = jsonDecode(utf8.decode(response.bodyBytes));
+      Map<String, dynamic> map = jsonDecode(jsonString);
       List<PlayerLocation> allPlayerLocation = List.filled(
           0, const PlayerLocation(icon: null, gp: null, idPlayer: null));
       for (int j = 0; j < map.length; j++) {
         GeoPoint gp = GeoPoint(
-            longitude: map[j]["longitude"], latitude: map[j]["latitude"]);
+            longitude: map[j]["longitudeJoueur"],
+            latitude: map[j]["latitudeJoueur"]);
         Icon? i;
-        int idPlayer = map[j]["idPlayer"]; //  vérifier avec doc si le nom de la clé correspondant à idPlayer se nomme bien comme ça
-        allPlayerLocation.add(
-            PlayerLocation(gp: gp, icon: i!, idPlayer: idPlayer));
+        int idPlayer = map[j]["idJoueur"];
+        allPlayerLocation
+            .add(PlayerLocation(gp: gp, icon: i!, idPlayer: idPlayer));
       }
       return allPlayerLocation;
-    }
-    else {
+    } else {
       if (kDebugMode) {
         print("Erreur de retour API : code erreur = " +
             response.statusCode.toString());
@@ -178,27 +229,26 @@ class ModelInterfaces {
   /// return [List<Abilities>]
   Future<List<Abilities>?> getPlayerAbilities() async {
     var url = Uri.parse(
-        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurJoueur&action=getLesCompetencesDebloques&idJoueur="
-            + _idUtilisateur);
+        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurJoueur&action=getLesCompetencesDebloques&idJoueur=" +
+            _idUtilisateur);
     final response = await http.get(url, headers: {
       'Accept': 'application/json',
     });
     List<Abilities>? allPlayerAbilities;
     if (response.statusCode ==
         200) // json n éléments de 3 clés : l'id du joueur, longitude et latitude
-        {
+    {
       var jsonString = jsonDecode(
           utf8.decode(response.bodyBytes)); // convertit le json en String
-      Map<String, dynamic> map = jsonDecode(
-          jsonString); // traduit le string json en map
+      Map<String, dynamic> map =
+          jsonDecode(jsonString); // traduit le string json en map
       for (int i = 0; i < map.length; i++) {
-        Abilities abil = Abilities(map[i]["name"], map[i]["desc"],
+        Abilities abil = Abilities(map[i]["nom"], map[i]["description"],
             map[i]["cooldown"]); // A revoir l'ordre en fonction du json reçu
         allPlayerAbilities?.add(abil);
       }
       return allPlayerAbilities!;
-    }
-    else {
+    } else {
       if (kDebugMode) {
         print("Erreur de retour API : code erreur = " +
             response.statusCode.toString());
@@ -214,26 +264,26 @@ class ModelInterfaces {
   Future<playerType> getPlayerType() async {
     var url = Uri.parse(
         "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=getPlayerType&idJoueur=" +
-            _idUtilisateur.toString() + "&idPartie=" + _currentGame!
-            .getId); // à compléter/reformuler lorsque la doc sera finie
+            _idUtilisateur.toString() +
+            "&idPartie=" +
+            _currentGame!
+                .getId); // à compléter/reformuler lorsque la doc sera finie
     final response = await http.get(url, headers: {
       'Accept': 'application/json',
     });
     if (response.statusCode ==
         200) // json n éléments de 3 clés : l'id du joueur, longitude et latitude
-        {
+    {
       var jsonString = jsonDecode(
           utf8.decode(response.bodyBytes)); // convertit le json en String
-      Map<String, dynamic> map = jsonDecode(
-          jsonString); // traduit le string json en map
-      if (map["role"] == "mouton") {
+      Map<String, dynamic> map =
+          jsonDecode(jsonString); // traduit le string json en map
+      if (map["role"] == 1) {
         return playerType.mouton;
-      }
-      else {
+      } else {
         return playerType.loup;
       }
-    }
-    else {
+    } else {
       if (kDebugMode) {
         print("Erreur de retour API : code erreur = " +
             response.statusCode.toString());
@@ -246,9 +296,9 @@ class ModelInterfaces {
   ///
   /// return [LobbyPlayer[]]
 
-  Future<List<LobbyPlayer>> getAllPlayerInLobby(int partyId) async {
+  Future<List<LobbyPlayer>> getAllPlayerInLobby(String partyId) async {
     var url = Uri.parse(
-        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=getAllJoueurs&idPartie=" +
+        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=getDonneesPartieJoueurs&idPartie=" +
             partyId
                 .toString()); // à compléter/reformuler lorsque la doc sera finie
     final response = await http.get(url, headers: {
@@ -256,29 +306,27 @@ class ModelInterfaces {
     });
     if (response.statusCode ==
         200) // json n éléments de 3 clés : l'id du joueur, longitude et latitude
-        {
-      var jsonString = jsonDecode(
-          utf8.decode(response.bodyBytes)); // convertit le json en String
-      Map<String, dynamic> map = jsonDecode(jsonString);
-
-    List<LobbyPlayer>? allAvailablesPlayer;
-    for (int i = 0; i < map.length; i++) {
-    String name = map[i]["name"];
-    bool ready = map[i]["ready"];
-    LobbyPlayer lPlayer = LobbyPlayer(name : map[i]["name"], isReady : map[i]["ready"]); // A revoir l'ordre en fonction du json reçu
-    allAvailablesPlayer?.add(lPlayer);
-    }
-    return allAvailablesPlayer!;
-
-
-    // A FAIRE A completer une fois que le lobby sera plus clair
-    }
-    else
     {
-    if(kDebugMode){
-    print("Erreur de retour API : code erreur = " + response.statusCode.toString() );
-    }
-    throw Exception('code erreur : ' + response.statusCode.toString() );
+      var jsonString =
+          utf8.decode(response.bodyBytes); // convertit le json en String
+      var map = jsonDecode(jsonString);
+      List<LobbyPlayer> allAvailablesPlayer = [];
+      for (int i = 0; i < map[2].length; i++) {
+        // nomJoueur
+        String nom = await getUserName(_idUtilisateur);
+        bool ready = map[2][i]["ready"] == 1;
+        LobbyPlayer lPlayer = LobbyPlayer(
+            name: nom,
+            isReady: ready); // A revoir l'ordre en fonction du json reçu
+        allAvailablesPlayer.add(lPlayer);
+      }
+      return allAvailablesPlayer;
+    } else {
+      if (kDebugMode) {
+        print("Erreur de retour API : code erreur = " +
+            response.statusCode.toString());
+      }
+      throw Exception('code erreur : ' + response.statusCode.toString());
     }
   }
 
@@ -286,48 +334,63 @@ class ModelInterfaces {
   ///
   /// return [PartyTime[]]<<
 
-
-  Future<List<PartyTime>> getAvailablesParties(Position PlayerLocation) async{
+  Future<List<PartyTime>> getAvailablesParties(Position playerLocation) async {
     // a traduire en anglais peut etre ?
     var url = Uri.parse(
-        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=getAllPartiesDisponible"); // à compléter/reformuler lorsque la doc sera finie
-
-    final response = await http.get(url, headers:{
-    'Accept': 'application/json',
+        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=getAllPartiesDisponible");
+    final response = await http.get(url, headers: {
+      'Accept': 'application/json',
     });
-    List<PartyTime>? allAvailablesParties;
-    if (response.statusCode == 200) // json n éléments de 3 clés : l'id du joueur, longitude et latitude
+    List<PartyTime> allAvailablesParties = [];
+    if (response.statusCode == 200) {
+      var jsonString = utf8.decode(response.bodyBytes);
+      var map = jsonDecode(jsonString);
+      for (int i = 0; i < map[2].length; i++) {
+        //Avoir le nombre de participant pour la ieme partie
+        var url2 = Uri.parse(
+            "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=getNombreParticipant&idPartie=" +
+                map[2][i]["idPartie"]);
+        final response2 = await http.get(url2, headers: {
+          'Accept': 'application/json',
+        }).catchError((error) {
+          print(error);
+        });
+        if (response2.statusCode ==
+            200) // json n éléments de 3 clés : l'id du joueur, longitude et latitude
         {
-    /*  final String name;
-                final double distance;
-                final int nbpersonnes;
-                final int uid;
-            */
-    var jsonString = jsonDecode(utf8.decode(response.bodyBytes)); // convertit le json en String
-    Map<String, dynamic> map = jsonDecode(jsonString); // traduit le string json en map
-    for (int i = 0; i < map.length; i++) {
-    double distance = await calculateDistance(map[i]["Zone"]["latitude"],map[i]["Zone"]["longitude"], map[i]["Zone"]["latitudeZone"], map[i]["Zone"]["longitudeZone"]);
-    PartyTime pTime = PartyTime(name : map[i]["name"], distance: distance, nbpersonnes: map[i]["nbPersonnes"], uid: map[i]["uid"]); // A revoir l'ordre en fonction du json reçu
-
-    allAvailablesParties?.add(pTime);
+          // ??? response2.body donne le résultat de la requête
+          // peut etre ToInt pour convertir nbPersonnes en int
+          double distance = await distance2point(
+              GeoPoint(
+                  latitude: playerLocation.latitude,
+                  longitude: playerLocation.longitude),
+              GeoPoint(
+                  latitude: double.parse(map[2][i]["latitudeZone"]),
+                  longitude: double.parse(map[2][i]["longitudeZone"])));
+          var res2 = jsonDecode(response2.body);
+          PartyTime pTime = PartyTime(
+              name: map[2][i]["nomZone"],
+              distance: distance,
+              nbpersonnes: int.parse(res2[2]),
+              uid: map[2][i]["idPartie"]);
+          allAvailablesParties.add(pTime);
+        } else {
+          if (kDebugMode) {
+            print("Erreur de retour API : code erreur = " +
+                response.statusCode.toString());
+          }
+          throw Exception('code erreur : ' + response.statusCode.toString());
+        }
+      }
+      return allAvailablesParties;
+    } else {
+      if (kDebugMode) {
+        print("Erreur de retour API : code erreur = " +
+            response.statusCode.toString());
+      }
+      throw Exception('code erreur : ' + response.statusCode.toString());
     }
-    return allAvailablesParties!;
-    }
-    else
-    {
-    if(kDebugMode){
-    print("Erreur de retour API : code erreur = " + response.statusCode.toString() );
-    }
-    throw Exception('code erreur : ' + response.statusCode.toString() );
-    }
-    }
-
-    Future<double> calculateDistance(double lat1, double lon1, double lat2, double lon2) async {
-
-    return  await distance2point(GeoPoint(longitude: lon1,latitude: lat1,),
-      GeoPoint( longitude: lon2, latitude: lat2, ),);
-
-    }
+  }
 
 /*double calculateDistance(GeoPoint gPUser, GeoPoint gPPartie){
     var p = 0.017453292519943295;
@@ -338,33 +401,33 @@ class ModelInterfaces {
     return 12742 * asin(sqrt(a));
   }*/
 
+}
 
-  }
-
-  class PlayerLocation {
+class PlayerLocation {
   final GeoPoint? gp;
   final Icon? icon;
   final int? idPlayer;
 
-  const PlayerLocation({required this.gp, required this.icon,required this.idPlayer});
-  }
+  const PlayerLocation(
+      {required this.gp, required this.icon, required this.idPlayer});
+}
 
-  class PartyTime {
+class PartyTime {
   final String name;
   final double distance;
   final int nbpersonnes;
-  final int uid;
+  final String uid;
 
   const PartyTime(
-  {required this.name,
-  required this.distance,
-  required this.nbpersonnes,
-  required this.uid});
-  }
+      {required this.name,
+      required this.distance,
+      required this.nbpersonnes,
+      required this.uid});
+}
 
-  class LobbyPlayer{
+class LobbyPlayer {
   final String name;
   final bool isReady;
 
   LobbyPlayer({required this.name, required this.isReady});
-  }
+}

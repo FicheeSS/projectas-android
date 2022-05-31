@@ -1,10 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:testiut/Interfaces/ModelInterfaces.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:testiut/main.dart';
 import 'package:testiut/tools/PlayingArguments.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class Lobby extends StatefulWidget {
   const Lobby({Key? key}) : super(key: key);
@@ -14,12 +13,12 @@ class Lobby extends StatefulWidget {
 }
 
 class LobbyState extends State<Lobby> {
-  List<LobbyPlayer> currentParties = [];
   List<DataRow> currentPartiesData = [];
   late Timer _timer;
-  late int partyId;
+  late String partyId;
+
   ///go to the next page with the provided party id
-  void selectedParty(int uid, BuildContext context) {
+  void selectedParty(String uid, BuildContext context) {
     Navigator.pushNamed(context, '/playing', arguments: PlayingArgument(uid));
   }
 
@@ -27,9 +26,14 @@ class LobbyState extends State<Lobby> {
 
   ///Update the table of the registered players
   Future<void> updateTable() async {
-
-    if(!mounted){return;}//make sure the widget exist before modifying it
-    currentParties = (await MI.getAllPlayerInLobby(partyId))!;
+    if (!mounted) {
+      return;
+    } //make sure the widget exist before modifying it
+    var currentParties =
+        await MI.getAllPlayerInLobby(partyId).catchError((error) {
+      print(error);
+      return [];
+    });
     List<DataRow> res = [];
     bool rdy = true;
     for (var c in currentParties) {
@@ -45,6 +49,10 @@ class LobbyState extends State<Lobby> {
         )
       ]));
     }
+    if (!mounted) {
+      return;
+    }
+    ;
     setState(() {
       areUReadyToDoThis = rdy;
       currentPartiesData = res;
@@ -92,7 +100,9 @@ class LobbyState extends State<Lobby> {
               ], rows: currentPartiesData),
               ElevatedButton(
                   onPressed: areUReadyToDoThis
-                      ?() {selectedParty(partyId, context);}
+                      ? () {
+                          selectedParty(partyId, context);
+                        }
                       : null,
                   child: Text(AppLocalizations.of(context)!.play))
             ]),
@@ -101,8 +111,9 @@ class LobbyState extends State<Lobby> {
       ),
     );
   }
+
   @override
-  void dispose(){
+  void dispose() {
     //make sure to cancel the timer otherwise it will call the callback function even with the widget disposed of
     _timer.cancel();
     super.dispose();

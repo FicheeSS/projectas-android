@@ -6,12 +6,12 @@ class Partie{
     late int _beginningTime = 0; // Timestamp
     String _name = "";
     int _gameLength = 0;
-    int _hideTime = 0;
+    int? _hideTime = 0;
     bool _isBeingPlayed = false;
     Zone _zonePartie = new Zone(0,0,0);
 
     /// Constructeur une fois que l'on reçoit l'id de la partie après l'envoi de la requête POST pour demander la création de la partie en base de donnée et récéption du JSON
-    Partie(String id, int beginningTime, String name, int gameLength,int hideTime,Zone zonePartie){
+    Partie({required String id, required int beginningTime, required String name, required int gameLength,int? hideTime,required Zone zonePartie}){
         _id=id;
         _beginningTime = beginningTime;
         _name=name;
@@ -41,7 +41,7 @@ class Partie{
     }
 
     /// Mise à jour partie host une fois le serveur envoie le id crée
-    int get gethideTime {
+    int? get gethideTime {
         return _hideTime;
     }
 

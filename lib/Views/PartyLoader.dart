@@ -1,34 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:http/http.dart' as http;
-import 'package:testiut/Interfaces/ModelInterfaces.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:testiut/tools/PlayingArguments.dart';
-import '../main.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:testiut/tools/PlayingArguments.dart';
+
+import '../main.dart';
 
 class PartyLoader extends StatefulWidget {
-  late List<PartyTime> currentParties;
-
-  void selectedParty(int uid,BuildContext context) {
-    Navigator.pushNamed(context, '/playing',arguments: PlayingArgument(uid));
-  }
-
-  Future<List<DataRow>> updateTable(BuildContext context) async{
-    currentParties = await MI.getAvailablesParties(await Geolocator.getCurrentPosition());
-    List<DataRow> res = [];
-    for (var c in currentParties) {
-      res.add(DataRow(cells: [
-        DataCell(Text(c.name)),
-        DataCell(Text(c.nbpersonnes.toString())),
-        DataCell(Text(c.distance.toString()))
-      ], onSelectChanged: (val) => {selectedParty(c.uid, context )}));
-    }
-    return res;
-  }
-
   PartyLoader({Key? key}) : super(key: key);
 
   @override
@@ -38,36 +19,78 @@ class PartyLoader extends StatefulWidget {
 }
 
 class _PartyLoaderState extends State<PartyLoader> {
+  void selectedParty(String uid, BuildContext context) {
+    Navigator.pushNamed(context, '/lobby', arguments: PlayingArgument(uid));
+  }
+
+  List<DataRow> res = [];
+  late Timer timer;
+
+  Future<void> updateTable(BuildContext context) async {
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      res.clear();
+    });
+    var currentParties =
+        await MI.getAvailablesParties(await Geolocator.getCurrentPosition());
+    for (var c in currentParties) {
+      if (!mounted) {
+        return;
+      }
+      ;
+      setState(() {
+        res.add(DataRow(cells: [
+          DataCell(Text(c.name)),
+          DataCell(Text(c.nbpersonnes.toString())),
+          DataCell(Text(c.distance.toStringAsFixed(2) + " m"))
+        ], onSelectChanged: (val) => {selectedParty(c.uid, context)}));
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    updateTable(context);
+    timer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      updateTable(context);
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Material(
         child: Scaffold(
-          appBar: AppBar(title:  Text(AppLocalizations.of(context)!.partiselection,
-            style:  TextStyle(color: Colors.white),
-          ),
-            leading:  IconButton(
-              icon:  Icon(Icons.arrow_back),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),),
-            body: Center(
-      child: FutureBuilder<List<DataRow>>(
-        future:  widget.updateTable(context),
-        builder: (BuildContext context, AsyncSnapshot<List<DataRow>> snapshot){
-          if(!snapshot.hasData){
-            return const Text("Waiting...");
-          }
-          return DataTable(
+      appBar: AppBar(
+        title: Text(
+          AppLocalizations.of(context)!.partiselection,
+          style: TextStyle(color: Colors.white),
+        ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+      body: Center(
+          child: DataTable(
               showCheckboxColumn: false,
               columns: <DataColumn>[
                 DataColumn(label: Text(AppLocalizations.of(context)!.name)),
-                DataColumn(label: Text(AppLocalizations.of(context)!.nbplayers)),
+                DataColumn(
+                    label: Text(AppLocalizations.of(context)!.nbplayers)),
                 DataColumn(label: Text(AppLocalizations.of(context)!.distance))
               ],
-              rows:snapshot.data!);
-        },
-      ),
-    )));
+              rows: res)),
+    ));
+  }
+
+  @override
+  void dispose() {
+    timer.cancel();
+    super.dispose();
   }
 }
