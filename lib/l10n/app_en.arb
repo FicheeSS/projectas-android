@@ -21,5 +21,6 @@
         "ready" : "ready",
         "notready" : "not ready",
     "play" : "Play",
-    "errorTitle" : "An error occured"
+    "errorTitle" : "An error occured",
+    "updateRdyStatus" : "Ready ?"
 }

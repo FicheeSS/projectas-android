@@ -6,15 +6,12 @@ import 'package:async/async.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
-import 'package:http/http.dart ' as http;
-import 'package:testiut/Interfaces/ModelInterfaces.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:testiut/Views/ButtonOnly.dart';
 import 'package:testiut/Views/MapOnly.dart';
 import 'package:testiut/tools/PlayingArguments.dart';
 
+import '../Modeles/Abilities.dart';
 import '../main.dart';
 
 class MapView extends StatefulWidget {

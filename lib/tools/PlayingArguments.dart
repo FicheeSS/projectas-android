@@ -1,5 +1,5 @@
-class PlayingArgument{
-  final int uid;
+class PlayingArgument {
+  final String uid;
 
   PlayingArgument(this.uid);
 }

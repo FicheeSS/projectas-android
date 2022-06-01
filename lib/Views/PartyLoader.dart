@@ -1,35 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:testiut/Interfaces/ModelInterfaces.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:testiut/tools/PlayingArguments.dart';
+
 import '../main.dart';
 
 class PartyLoader extends StatefulWidget {
-  late List<PartyTime> currentParties;
-
-  ///The user as selected a party we try to connect to it and go to the lobby
-  void selectedParty(int uid,BuildContext context) {
-    if( !MI.updatePlayerParticipation(true)){return;}
-    Navigator.pushNamed(context, '/lobby',arguments: PlayingArgument(uid));
-  }
-
-  ///create the table with all the party in the db
-  List<DataRow> updateTable(BuildContext context) {
-    currentParties = MI.getAvailablesParties();
-    List<DataRow> res = [];
-    for (var c in currentParties) {
-      res.add(DataRow(cells: [
-        DataCell(Text(c.name)),
-        DataCell(Text(c.nbpersonnes.toString())),
-        DataCell(Text(c.distance.toString()))
-      ], onSelectChanged: (val) => {selectedParty(c.uid, context )}));
-    }
-    return res;
-  }
-
   PartyLoader({Key? key}) : super(key: key);
 
   @override
@@ -39,6 +19,46 @@ class PartyLoader extends StatefulWidget {
 }
 
 class _PartyLoaderState extends State<PartyLoader> {
+  void selectedParty(String uid, BuildContext context) {
+    Navigator.pushNamed(context, '/lobby', arguments: PlayingArgument(uid));
+  }
+
+  List<DataRow> res = [];
+  late Timer timer;
+
+  Future<void> updateTable(BuildContext context) async {
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      res.clear();
+    });
+    var currentParties =
+        await MI.getAvailablesParties(await Geolocator.getCurrentPosition());
+    for (var c in currentParties) {
+      if (!mounted) {
+        return;
+      }
+      ;
+      setState(() {
+        res.add(DataRow(cells: [
+          DataCell(Text(c.name)),
+          DataCell(Text(c.nbpersonnes.toString())),
+          DataCell(Text(c.distance.toStringAsFixed(2) + " m"))
+        ], onSelectChanged: (val) => {selectedParty(c.uid, context)}));
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    updateTable(context);
+    timer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      updateTable(context);
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Material(

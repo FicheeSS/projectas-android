@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:testiut/main.dart';
 
 class WaitingView extends StatelessWidget {
+  final Function(currentState cs) callbackFunction;
 
-  const WaitingView({Key? key})
+  const WaitingView({Key? key, required this.callbackFunction})
       : super(key: key);
 
   @override
@@ -17,7 +18,7 @@ class WaitingView extends StatelessWidget {
       ),
       Padding(
         padding: EdgeInsets.only(top: 16),
-        child: Text('Waiting...', style: TextStyle(fontSize: 15)),
+        child: Text('Waiting...', style: const TextStyle(fontSize: 15)),
       )
     ];
     return Center(
