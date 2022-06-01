@@ -18,7 +18,8 @@
     "ready" : "pres",
     "notready" : "pas pres",
     "play" : "Jouer",
-    "errorTitle" : "OMG c'est une error"
+    "errorTitle" : "OMG c'est une error",
+    "updateRdyStatus" : "Prèt ?"
 
 
 

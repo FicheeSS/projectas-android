@@ -23,6 +23,7 @@ class LobbyState extends State<Lobby> {
   }
 
   bool areUReadyToDoThis = false;
+  bool playerReady = false;
 
   ///Update the table of the registered players
   Future<void> updateTable() async {
@@ -104,7 +105,20 @@ class LobbyState extends State<Lobby> {
                           selectedParty(partyId, context);
                         }
                       : null,
-                  child: Text(AppLocalizations.of(context)!.play))
+                  child: Text(AppLocalizations.of(context)!.play)),
+              ElevatedButton(
+                  onPressed: () {
+                    playerReady = !playerReady;
+                    MI.updatePlayerParticipation(playerReady);
+                  },
+                  style: playerReady
+                      ? ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all<Color>(Colors.red))
+                      : ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all<Color>(
+                              Colors.blueAccent)),
+                  child: Text(AppLocalizations.of(context)!.updateRdyStatus))
             ]),
           ),
         ),

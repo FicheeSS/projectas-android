@@ -115,17 +115,6 @@ class _MapViewState extends State<MapView> {
     }
   }
 
-  //fct callback du timer
-  /*void fctCB(){
-    getPositionsFromRest(mapController);
-    if(count++>2&&!isKillEnable){
-      setState(() {
-        count=0;
-        isKillEnable=true;
-      });
-    }
-  }*/
-
   int count = 0;
 
   @override

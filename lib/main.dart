@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -11,7 +13,6 @@ import 'package:testiut/Interfaces/ModelInterfaces.dart';
 import 'package:testiut/Views/Lobby.dart';
 import 'package:testiut/Views/MapView.dart';
 import 'package:testiut/Views/PartyLoader.dart';
-import 'package:testiut/Views/WaitingView.dart';
 import 'package:testiut/tools/RandomGarbage.dart';
 
 import 'Views/SignIn.dart';
@@ -22,7 +23,7 @@ final FirebaseAuth auth = FirebaseAuth.instance;
 final GoogleSignIn googleSignIn = GoogleSignIn();
 late LocationPermission permission;
 enum initializationStatus { narmol, bienvenue, erreur }
-
+var killStream = StreamController();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -51,6 +52,8 @@ class MyApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+      debugShowCheckedModeBanner: false,
+      debugShowMaterialGrid: false,
       showPerformanceOverlay: false,
       supportedLocales: const [
         Locale('en', ''),
@@ -100,26 +103,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     });
   }
 
-//Select the correct view for the job from [_cs]
-  Widget showCorrectWidget() {
-    switch (_cs) {
-      case currentState.none:
-        return WaitingView(
-          callbackFunction: callback,
-        );
-        break;
-      case currentState.showMap:
-        return MapView();
-        break;
-      case currentState.showPartySelection:
-        return PartyLoader();
-        break;
-      case currentState.showSingin:
-        return LoginScreen();
-        break;
-    }
-  }
-
   final ButtonStyle style =
       ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
   Exception? initialisationError;
@@ -134,6 +117,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         .catchError((error) => {print(error)});
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     androidInfo = await deviceInfo.androidInfo;
+    initialisationError = await MI.tryConnectToApi();
     if (!await MI.isUserExist()) {
       await MI.addUser();
       status = initializationStatus.bienvenue;
@@ -242,7 +226,6 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         );
       case initializationStatus.erreur:
         return ShowErrorDialog(e: initialisationError!);
-        break;
     }
   }
 }

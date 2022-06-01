@@ -23,16 +23,7 @@ class ModelInterfaces {
   late Partie? _currentGame;
 
   Future<String> getUserName(String uid) async {
-    String bearer = uid;
-    String token = "Bearer $bearer";
-    var apiUrl = Uri.parse('https://www.googleapis.com/oauth2/v2/userinfo');
-    final response = await http.get(apiUrl, headers: {'Authorization': token});
-    if (response.statusCode != 200) {
-      return "nom";
-    }
-    final responseJson = jsonDecode(response.body);
-
-    return responseJson["name"];
+    return "name";
   }
 
   /// Constructeur Utilisateur
@@ -57,7 +48,7 @@ class ModelInterfaces {
         "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurJoueur&action=insertJoueur&idGoogle=" +
             _idUtilisateur +
             "&nom=" +
-            googleSignIn!.currentUser!.displayName!);
+            googleSignIn.currentUser!.displayName!);
     final response = await http.get(url, headers: {
       'Accept': 'application/json',
     });
@@ -75,17 +66,55 @@ class ModelInterfaces {
   }
 
   ///Return the reason why we cannot connect to the api, null otherwise
-  Exception? tryConnectToApi() {
-    return null;
-    //return TimeoutException("Cannot connect in time");
+  Future<Exception?> tryConnectToApi() async {
+    var url = Uri.parse(
+        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurJoueur&action=Ping%22");
+    final response = await http.get(url, headers: {
+      'Accept': 'application/json',
+    });
+    if (response.statusCode == 200) {
+      return null;
+    } else {
+      if (kDebugMode) {
+        print(response.reasonPhrase);
+        var messageM = jsonDecode(utf8.decode(response.bodyBytes));
+        print(messageM);
+      }
+      return TimeoutException("Cannot connect in time");
+    }
   }
 
   ///Notify the api that the player is participating or not depending on the  bool
   ///
   /// Return if the player can participate
   /// Return is discarded if [isParticipating] is false
-  bool updatePlayerParticipation(bool isParticipating) {
-    return true;
+  Future<bool> updatePlayerParticipation(bool isParticipating) async {
+    String participate;
+    if (isParticipating) {
+      participate = "1";
+    } else {
+      participate = "0";
+    }
+    var url = Uri.parse(
+        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=updatePlayerReady&idJoueur=" +
+            _idUtilisateur +
+            "&idPartie=" +
+            _currentGame!.getId +
+            "&ready=" +
+            participate);
+    final response = await http.get(url, headers: {
+      'Accept': 'application/json',
+    });
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      if (kDebugMode) {
+        print(response.reasonPhrase);
+        var messageM = jsonDecode(utf8.decode(response.bodyBytes));
+        print(messageM);
+      }
+      return false;
+    }
   }
 
   Future<bool> joinGame(String idPartie) async {
