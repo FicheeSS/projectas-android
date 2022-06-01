@@ -63,34 +63,25 @@ class _PartyLoaderState extends State<PartyLoader> {
   Widget build(BuildContext context) {
     return Material(
         child: Scaffold(
-      appBar: AppBar(
-        title: Text(
-          AppLocalizations.of(context)!.partiselection,
-          style: TextStyle(color: Colors.white),
-        ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      body: Center(
-          child: DataTable(
-              showCheckboxColumn: false,
-              columns: <DataColumn>[
-                DataColumn(label: Text(AppLocalizations.of(context)!.name)),
-                DataColumn(
-                    label: Text(AppLocalizations.of(context)!.nbplayers)),
-                DataColumn(label: Text(AppLocalizations.of(context)!.distance))
-              ],
-              rows: res)),
-    ));
-  }
-
-  @override
-  void dispose() {
-    timer.cancel();
-    super.dispose();
+          appBar: AppBar(title:  Text(AppLocalizations.of(context)!.partiselection,
+            style:  TextStyle(color: Colors.white),
+          ),
+            leading:  IconButton(
+              icon:  Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),),
+            body: Center(
+      child: DataTable(
+          showCheckboxColumn: false,
+          columnSpacing: 22,
+          columns: <DataColumn>[
+            DataColumn(label: Text(AppLocalizations.of(context)!.name)),
+            DataColumn(label: Text(AppLocalizations.of(context)!.nbplayers)),
+            DataColumn(label: Text(AppLocalizations.of(context)!.distance))
+          ],
+          rows: widget.updateTable(context)),
+    )));
   }
 }

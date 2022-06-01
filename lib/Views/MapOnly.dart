@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
+import 'package:testiut/Interfaces/ModelInterfaces.dart';
 import 'package:testiut/main.dart';
 import 'package:http/http.dart' as http;
 
@@ -56,11 +57,16 @@ class _MapOnlyState extends State<MapOnly> {
           .catchError((error) => {print("Catched error" + error.toString())});
     }
   }
+  // liste des autres utilisateurs
+  var listPlayer = [];
 
   void updateMap() async {
-    for (;;) {
-      var res = await MI.getPlayersLocation();
-      for (var pos in res) {
+      //var res = await MI.getPlayersLocation();
+      for (var pos in listPlayer) {
+        mapController.removeMarker(pos.gp!);
+      }
+      listPlayer=[PlayerLocation(gp: await mapController.myLocation(), icon: Icon(Icons.local_airport), idPlayer: 1)];
+      for (var pos in listPlayer) {
         mapController.addMarker(
           pos.gp!,
           markerIcon: MarkerIcon(
@@ -68,12 +74,7 @@ class _MapOnlyState extends State<MapOnly> {
           ),
         );
       }
-      sleep(const Duration(seconds: 5));
-      for (var pos in res) {
-        mapController.removeMarker(pos.gp!);
-      }
     }
-  }
 
   late Timer _timer;
 
@@ -83,7 +84,8 @@ class _MapOnlyState extends State<MapOnly> {
   @override
   Widget build(BuildContext context) {
     _timer = Timer.periodic(const Duration(seconds: 5),
-        (timer) => {getPositionsFromRest(mapController)});
+        (timer) => {updateMap()});
+
     return OSMFlutter(
         controller: mapController,
         trackMyPosition: true,
