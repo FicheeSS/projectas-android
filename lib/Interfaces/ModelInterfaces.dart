@@ -49,7 +49,7 @@ class ModelInterfaces {
   /// return [List<Abilities>]
   List<Abilities> getPlayerAbilities(){
     // throw UnimplementedError();
-    List<Abilities> temp = [Abilities(nom:"Manger",desc:"Bah tu mange frr",cd:5),Abilities(nom: "Dormir",desc: "bah du dors",cd: 2)];
+    List<Abilities> temp = [Abilities(nom:"Brouillage",desc:"Bah tu mange frr",cd:5),Abilities(nom: "Detection",desc: "bah du dors",cd: 2)];
     return temp;
   }
 
@@ -70,7 +70,7 @@ class ModelInterfaces {
   /// return [LobbyPlayer[]]
 
   List<LobbyPlayer> getAllPlayerInLobby(int partyId){
-    return [LobbyPlayer(name: "bruh", isReady:true),LobbyPlayer(name: "bruh2", isReady:true)];
+    return [LobbyPlayer(name: "Valentin", isReady:true),LobbyPlayer(name: "Theo", isReady:true),LobbyPlayer(name: "Robin", isReady:true),LobbyPlayer(name: "Agathe", isReady:true),LobbyPlayer(name: "Maxime", isReady:true)];
     throw UnimplementedError();
   }
 
@@ -79,7 +79,7 @@ class ModelInterfaces {
   /// return [PartyTime[]]
   List<PartyTime> getAvailablesParties() {
     //TODO : Implement getAvailablesParties
-    List<PartyTime> pt = [PartyTime(name: "Mangemoi", distance: 12, nbpersonnes: 1, uid: 99),PartyTime(name: "Mangetoi", distance: 1, nbpersonnes: 12, uid: 99)];
+    List<PartyTime> pt = [PartyTime(name: "Quartier Nord", distance: 12, nbpersonnes: 5, uid: 99),PartyTime(name: "IUT Orsay", distance: 1, nbpersonnes: 12, uid: 99),PartyTime(name: "Orsay", distance: 12, nbpersonnes: 5, uid: 99)];
     return pt;
     throw UnimplementedError();
   }

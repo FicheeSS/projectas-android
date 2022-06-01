@@ -55,6 +55,7 @@ class _PartyLoaderState extends State<PartyLoader> {
             body: Center(
       child: DataTable(
           showCheckboxColumn: false,
+          columnSpacing: 22,
           columns: <DataColumn>[
             DataColumn(label: Text(AppLocalizations.of(context)!.name)),
             DataColumn(label: Text(AppLocalizations.of(context)!.nbplayers)),

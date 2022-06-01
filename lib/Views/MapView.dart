@@ -87,7 +87,7 @@ class _MapViewState extends State<MapView> {
                     shape: BoxShape.circle, color: Colors.white),
                 child: MapOnly()),
             SizedBox(
-                height: MediaQuery.of(context).size.height / 4,
+                height: MediaQuery.of(context).size.height / 5,
                 width: (MediaQuery.of(context).size.width > 1000)
                     ? 1000
                     : MediaQuery.of(context).size.width,
