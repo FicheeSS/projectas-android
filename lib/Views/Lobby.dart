@@ -19,6 +19,7 @@ class LobbyState extends State<Lobby> {
 
   ///go to the next page with the provided party id
   void selectedParty(String uid, BuildContext context) {
+    MI.startParty();
     Navigator.pushNamed(context, '/playing', arguments: PlayingArgument(uid));
   }
 
@@ -72,7 +73,7 @@ class LobbyState extends State<Lobby> {
         (ModalRoute.of(context)!.settings.arguments as PlayingArgument).uid;
     updateTable();
     _timer =
-        Timer.periodic(const Duration(seconds: 2), (timer) => {updateTable()});
+        Timer.periodic(const Duration(seconds: 5), (timer) => {updateTable()});
     return WillPopScope(
       onWillPop: () async {
         goBack();

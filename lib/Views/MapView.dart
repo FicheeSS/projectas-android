@@ -1,8 +1,3 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-import 'package:async/async.dart';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -10,9 +5,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:testiut/Views/ButtonOnly.dart';
 import 'package:testiut/Views/MapOnly.dart';
 import 'package:testiut/tools/PlayingArguments.dart';
-
-import '../Modeles/Abilities.dart';
-import '../main.dart';
 
 class MapView extends StatefulWidget {
   MapView({Key? key}) : super(key: key);
@@ -24,8 +16,7 @@ class MapView extends StatefulWidget {
 }
 
 class _MapViewState extends State<MapView> {
-  int uid = 0;
-
+  String uid = "";
 
   void returnToStart() {
     Navigator.pushNamed(context, "/");
@@ -35,7 +26,6 @@ class _MapViewState extends State<MapView> {
   /// return the abilities get with getPlayerAbilities to dispay on screen
   ///
   /// return List<ElevatedButton>
-
 
   @override
   Widget build(BuildContext context) {
@@ -58,19 +48,19 @@ class _MapViewState extends State<MapView> {
             onPressed: () => showDialog<String>(
                 context: context,
                 builder: (BuildContext context) => AlertDialog(
-                  title: Text(AppLocalizations.of(context)!.warn),
-                  content: Text(AppLocalizations.of(context)!.surequit),
-                  actions: <Widget>[
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, 'Cancel'),
-                      child: const Text('Non'),
-                    ),
-                    TextButton(
-                      onPressed: () => returnToStart(),
-                      child: const Text('Oui'),
-                    ),
-                  ],
-                )),
+                      title: Text(AppLocalizations.of(context)!.warn),
+                      content: Text(AppLocalizations.of(context)!.surequit),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, 'Cancel'),
+                          child: const Text('Non'),
+                        ),
+                        TextButton(
+                          onPressed: () => returnToStart(),
+                          child: const Text('Oui'),
+                        ),
+                      ],
+                    )),
           ),
         ),
         body: Column(
@@ -97,7 +87,6 @@ class _MapViewState extends State<MapView> {
 
   @override
   void dispose() {
-
     super.dispose();
   }
 }

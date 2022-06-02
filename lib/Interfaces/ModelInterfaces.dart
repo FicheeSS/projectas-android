@@ -9,7 +9,6 @@ import 'package:http/http.dart' as http;
 import 'package:testiut/Modeles/Abilities.dart';
 import 'package:testiut/Modeles/Partie.dart';
 import 'package:testiut/Modeles/Zone.dart';
-import 'package:testiut/main.dart';
 
 enum playerType { mouton, loup }
 
@@ -20,10 +19,39 @@ class ModelInterfaces {
 
   late String
       _idUtilisateur; // L'id qui est donc stocké dans le téléphone lié à Google
-  late Partie? _currentGame;
+  late Partie _currentGame;
+  late String _displayName;
+
+  void killPlayer(String idPlayer) async {
+    var url = Uri.parse(
+        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=updatePlayerTuer&idGoogle=" +
+            idPlayer +
+            "&idPartie" +
+            _currentGame.getId);
+    final response = await http.get(url, headers: {
+      'Accept': 'application/json',
+    });
+    if (response.statusCode != 200) {
+      print("error on killPlayer");
+    }
+  }
 
   Future<String> getUserName(String uid) async {
-    return "name";
+    var url = Uri.parse(
+        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurJoueur&action=getJoueurById&idGoogle=" +
+            _idUtilisateur);
+    final response = await http.get(url, headers: {
+      'Accept': 'application/json',
+    });
+    if (response.statusCode != 200) {
+      return "";
+    }
+    var json = jsonDecode(response.body);
+    return json[2]["pseudo"];
+  }
+
+  void setdisplayName(String name) {
+    _displayName = name;
   }
 
   /// Constructeur Utilisateur
@@ -35,7 +63,7 @@ class ModelInterfaces {
 
   Future<bool> isUserExist() async {
     var url = Uri.parse(
-        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurJoueur&action=getJoueurById&idJoueur=" +
+        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurJoueur&action=getJoueurById&idGoogle=" +
             _idUtilisateur);
     final response = await http.get(url, headers: {
       'Accept': 'application/json',
@@ -47,16 +75,15 @@ class ModelInterfaces {
     var url = Uri.parse(
         "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurJoueur&action=insertJoueur&idGoogle=" +
             _idUtilisateur +
-            "&nom=" +
-            googleSignIn.currentUser!.displayName!);
+            "&pseudo=" +
+            _displayName);
     final response = await http.get(url, headers: {
       'Accept': 'application/json',
     });
     if (response.statusCode != 200) {
       if (kDebugMode) {
         print(response.reasonPhrase);
-        var messageM = jsonDecode(utf8.decode(response.bodyBytes));
-        print(messageM);
+        print(response.body);
       }
     }
   }
@@ -68,7 +95,7 @@ class ModelInterfaces {
   ///Return the reason why we cannot connect to the api, null otherwise
   Future<Exception?> tryConnectToApi() async {
     var url = Uri.parse(
-        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurJoueur&action=Ping%22");
+        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurJoueur&action=Ping");
     final response = await http.get(url, headers: {
       'Accept': 'application/json',
     });
@@ -95,13 +122,14 @@ class ModelInterfaces {
     } else {
       participate = "0";
     }
-    var url = Uri.parse(
+    var tmp =
         "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=updatePlayerReady&idJoueur=" +
             _idUtilisateur +
             "&idPartie=" +
-            _currentGame!.getId +
+            _currentGame.getId +
             "&ready=" +
-            participate);
+            participate;
+    var url = Uri.parse(tmp);
     final response = await http.get(url, headers: {
       'Accept': 'application/json',
     });
@@ -119,11 +147,12 @@ class ModelInterfaces {
 
   Future<bool> joinGame(String idPartie) async {
     // joindre la partie
-    var url = Uri.parse(
-        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurJoueur&action=joinPartie&idJoueur=" +
+    var tmp =
+        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurJoueur&action=joinPartie&idGoogle=" +
             _idUtilisateur +
             "&idPartie=" +
-            idPartie); // Demande d'ajout au tableau joueurs de partie
+            idPartie;
+    var url = Uri.parse(tmp); // Demande d'ajout au tableau joueurs de partie
     final response = await http.get(url, headers: {
       'Accept': 'application/json',
     });
@@ -136,53 +165,35 @@ class ModelInterfaces {
         'Accept': 'application/json',
       });
       if (response2.statusCode == 200) {
-        var jsonString = jsonDecode(
-            utf8.decode(response2.bodyBytes)); // convertit le json en String
-        Map<String, dynamic> map =
-            jsonDecode(jsonString); // traduit le string json en map
+        var jsonString =
+            utf8.decode(response2.bodyBytes); // convertit le json en String
+        var map = jsonDecode(jsonString); // traduit le string json en map
 
         // appel pour récupérer le nom de la zone = nom de la partie
-        var url3 = Uri.parse(
-            "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurZone&action=getZoneById&idZone=" +
-                map["idZone"]); // Demande d'ajout au tableau joueurs de partie
-        final response3 = await http.get(url3, headers: {
-          'Accept': 'application/json',
-        });
-        if (response3.statusCode == 200) {
-          var jsonString = jsonDecode(utf8.decode(response3.bodyBytes));
-          Map<String, dynamic> map2 = jsonDecode(jsonString);
-          var nomDeZone = map2["nomZone"];
-          int radius = map2["rayonZone"];
-          double latitude = map2["latitudeZone"];
-          double longitude = map2["longitudeZone"];
-          Zone zone = Zone(latitude, longitude, radius);
-          var _currentGame = Partie(
-              id: map["idPartie"],
-              beginningTime: map["datePartie"],
-              name: nomDeZone,
-              gameLength: map["tempsLimite"],
-              zonePartie:
-                  zone); // affecte à l'attribut _currentGame la partie à rejoindre
-        } else {
-          if (kDebugMode) {
-            print(response3.reasonPhrase);
-            var messageM = jsonDecode(utf8.decode(response3.bodyBytes));
-            print(messageM);
-          }
-        }
+        var nomDeZone = map[2]["zone"]["nomZone"];
+        var radius = map[2]["zone"]["rayonZone"];
+        double latitude = double.parse(map[2]["zone"]["latitudeZone"]);
+        double longitude = double.parse(map[2]["zone"]["longitudeZone"]);
+        radius ??= 0;
+        Zone zone = Zone(latitude, longitude, radius);
+        _currentGame = Partie(
+            id: map[2]["idPartie"],
+            beginningTime: DateTime.parse(map[2]["datePartie"]),
+            name: nomDeZone,
+            gameLength: int.parse(map[2]["tempsLimite"]),
+            zonePartie:
+                zone); // affecte à l'attribut _currentGame la partie à rejoindre
       } else {
         if (kDebugMode) {
           print(response2.reasonPhrase);
-          var messageM = jsonDecode(utf8.decode(response2.bodyBytes));
-          print(messageM);
+          print(utf8.decode(response2.bodyBytes));
         }
       }
       return true;
     } else {
       if (kDebugMode) {
         print(response.reasonPhrase);
-        var messageM = jsonDecode(utf8.decode(response.bodyBytes));
-        print(messageM);
+        print(utf8.decode(response.bodyBytes));
       }
       return false;
     }
@@ -197,7 +208,7 @@ class ModelInterfaces {
         "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=updatePlayerLocation&idJoueur=" +
             _idUtilisateur +
             "&idPartie=" +
-            _currentGame!.getId +
+            _currentGame.getId +
             "&latitudeJoueur=" +
             gp.latitude.toString() +
             "&longitudeJoueur=" +
@@ -223,7 +234,7 @@ class ModelInterfaces {
   Future<List<PlayerLocation>> getPlayersLocation() async {
     var url = Uri.parse(
         "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=getDonneesPartieJoueurs&idPartie=" +
-            _currentGame!.getId);
+            _currentGame.getId);
     final response = await http.get(url, headers: {
       'Accept': 'application/json',
     });
@@ -239,7 +250,7 @@ class ModelInterfaces {
             longitude: map[j]["longitudeJoueur"],
             latitude: map[j]["latitudeJoueur"]);
         Icon? i;
-        int idPlayer = map[j]["idJoueur"];
+        String idPlayer = map[j]["idJoueur"];
         allPlayerLocation
             .add(PlayerLocation(gp: gp, icon: i!, idPlayer: idPlayer));
       }
@@ -295,7 +306,7 @@ class ModelInterfaces {
         "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=getPlayerType&idJoueur=" +
             _idUtilisateur.toString() +
             "&idPartie=" +
-            _currentGame!
+            _currentGame
                 .getId); // à compléter/reformuler lorsque la doc sera finie
     final response = await http.get(url, headers: {
       'Accept': 'application/json',
@@ -342,10 +353,10 @@ class ModelInterfaces {
       List<LobbyPlayer> allAvailablesPlayer = [];
       for (int i = 0; i < map[2].length; i++) {
         // nomJoueur
-        String nom = await getUserName(_idUtilisateur);
-        bool ready = map[2][i]["ready"] == 1;
+        var nom = map[2][i]["joueur"]["pseudo"];
+        bool ready = map[2][i]["ready"] == "1";
         LobbyPlayer lPlayer = LobbyPlayer(
-            name: nom,
+            name: await nom,
             isReady: ready); // A revoir l'ordre en fonction du json reçu
         allAvailablesPlayer.add(lPlayer);
       }
@@ -421,6 +432,19 @@ class ModelInterfaces {
     }
   }
 
+  void startParty() async {
+    var url = Uri.parse(
+        "https://projets.iut-orsay.fr/prj-as-2022/api/?controleur=controleurPartie&action=startPartie&idPartie=" +
+            _currentGame.getId);
+    final response = await http.get(url, headers: {
+      'Accept': 'application/json',
+    });
+    if (response.statusCode != 200) {
+      print("error in startParty");
+      print(response.body);
+    }
+  }
+
 /*double calculateDistance(GeoPoint gPUser, GeoPoint gPPartie){
     var p = 0.017453292519943295;
     var c = cos;
@@ -435,7 +459,7 @@ class ModelInterfaces {
 class PlayerLocation {
   final GeoPoint? gp;
   final Icon? icon;
-  final int? idPlayer;
+  final String? idPlayer;
 
   const PlayerLocation(
       {required this.gp, required this.icon, required this.idPlayer});

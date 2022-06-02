@@ -1,13 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
+import 'package:http/http.dart' as http;
 import 'package:testiut/Interfaces/ModelInterfaces.dart';
 import 'package:testiut/main.dart';
-import 'package:http/http.dart' as http;
 
 class MapOnly extends StatefulWidget {
   MapOnly({Key? key}) : super(key: key);
@@ -19,6 +18,26 @@ class MapOnly extends StatefulWidget {
 }
 
 class _MapOnlyState extends State<MapOnly> {
+  @override
+  void initState() {
+    killStream.stream.listen((ev) {
+      if (ev == event.kill) {
+        killSomeone();
+      }
+    });
+    super.initState();
+  }
+
+  void killSomeone() async {
+    for (var pos in listPlayer) {
+      double dist = await distance2point(
+          (pos as PlayerLocation).gp!, await mapController.myLocation());
+      if (5 <= dist) {
+        MI.killPlayer((pos).idPlayer!);
+      }
+    }
+  }
+
   void getPositionsFromRest(MapController mapController) async {
     var url = Uri.parse(
         "https://projets.iut-orsay.fr/prj-as-2022/Examples/rest.php?position");
@@ -57,24 +76,24 @@ class _MapOnlyState extends State<MapOnly> {
           .catchError((error) => {print("Catched error" + error.toString())});
     }
   }
+
   // liste des autres utilisateurs
   var listPlayer = [];
 
   void updateMap() async {
-      //var res = await MI.getPlayersLocation();
-      for (var pos in listPlayer) {
-        mapController.removeMarker(pos.gp!);
-      }
-      listPlayer=[PlayerLocation(gp: await mapController.myLocation(), icon: Icon(Icons.local_airport), idPlayer: 1)];
-      for (var pos in listPlayer) {
-        mapController.addMarker(
-          pos.gp!,
-          markerIcon: MarkerIcon(
-            icon: pos.icon!,
-          ),
-        );
-      }
+    listPlayer = await MI.getPlayersLocation();
+    for (var pos in listPlayer) {
+      mapController.removeMarker(pos.gp!);
     }
+    for (var pos in listPlayer) {
+      mapController.addMarker(
+        pos.gp!,
+        markerIcon: MarkerIcon(
+          icon: pos.icon!,
+        ),
+      );
+    }
+  }
 
   late Timer _timer;
 
@@ -83,8 +102,8 @@ class _MapOnlyState extends State<MapOnly> {
   );
   @override
   Widget build(BuildContext context) {
-    _timer = Timer.periodic(const Duration(seconds: 5),
-        (timer) => {updateMap()});
+    _timer =
+        Timer.periodic(const Duration(seconds: 5), (timer) => {updateMap()});
 
     return OSMFlutter(
         controller: mapController,
@@ -131,8 +150,9 @@ class _MapOnlyState extends State<MapOnly> {
           ),
         )));
   }
+
   @override
-  void disopose(){
+  void disopose() {
     _timer.cancel();
     mapController.dispose();
     super.dispose();

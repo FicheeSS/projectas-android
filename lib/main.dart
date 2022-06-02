@@ -23,7 +23,10 @@ final FirebaseAuth auth = FirebaseAuth.instance;
 final GoogleSignIn googleSignIn = GoogleSignIn();
 late LocationPermission permission;
 enum initializationStatus { narmol, bienvenue, erreur }
+
+enum event { kill }
 var killStream = StreamController();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -111,10 +114,15 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     await ls
         .signInWithGoogle()
         .then((value) => {
-              setState(() =>
-                  {_name = ls.user!.displayName!, MI.setIdUser(ls.user!.uid)})
+              setState(() => {
+                    _name = ls.user!.displayName!,
+                    MI.setIdUser(ls.user!.uid),
+                    MI.setdisplayName(ls.user!.displayName!)
+                  })
             })
-        .catchError((error) => {print(error)});
+        .catchError((error) {
+      initialisationError = error;
+    });
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     androidInfo = await deviceInfo.androidInfo;
     initialisationError = await MI.tryConnectToApi();
