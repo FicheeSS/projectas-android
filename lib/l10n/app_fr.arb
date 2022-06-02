@@ -3,7 +3,7 @@
     "getfromrest" : "Charge depuis Rest",
     "reset" : "Reset",
     "showmap"  :"Afficher la carte",
-    "kill" : "Kill",
+    "kill" : "Tuer",
     "name" : "Nom",
     "nbplayers" : "Nombre de joueurs",
     "distance" : "Distance",
@@ -18,7 +18,8 @@
     "ready" : "pres",
     "notready" : "pas pres",
     "play" : "Jouer",
-    "errorTitle" : "OMG c'est une error"
+    "errorTitle" : "OMG c'est une error",
+    "updateRdyStatus" : "Prèt ?"
 
 
 
